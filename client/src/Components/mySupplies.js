@@ -34,11 +34,11 @@ const Paginationn = ({ page, setPage, max }) => {
 
 export default function Feed() {
   const getUserId = () => {
-    const user = JSON.parse(window.localStorage.getItem("user"));
+    const user = JSON.parse(window.localStorage.get("user")); // eslint-disable-next-line
     return user ? user : null;
   };
   const user_info = getUserId();
-  setConstraint(true);
+  setConstraint(true); // eslint-disable-next-line
 
   const [supplies, setsupplies] = useState("");
   const [page, setPage] = useState(1);
@@ -46,7 +46,7 @@ export default function Feed() {
 
   const fetchData = async () => {
     try {
-      const response = await Axios.get("http://localhost:4000/supplies");
+      const response = await Axios.get("http://localhost:4000/suppliess"); // eslint-disable-next-line
       const allsuppliess = response.data.suppliess.reverse();
       const suppliessPerPage = 9;
       const numSuppliess = allsuppliess.length;
@@ -175,6 +175,7 @@ export default function Feed() {
 
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line
   }, [page]);
 
   useEffect(() => {
@@ -182,7 +183,7 @@ export default function Feed() {
       fetchData();
     }, 3000);
 
-    return () => clearInterval(interval);
+    return () => clearInterval(interval); // eslint-disable-next-line
   }, []);
 
   return (

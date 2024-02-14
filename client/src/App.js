@@ -1,5 +1,4 @@
-import React, { useEffect } from "react";
-import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import Signup from "./Components/Signup";
 import Login from "./Components/Login";
@@ -11,8 +10,8 @@ import ItemPage from "./Components/ItemPage";
 import LostItem from "./Components/Lost_item";
 import MyListings from "./Components/MyListings";
 import MySupplies from "./Components/mySupplies";
+import Supplies from "./Components/supplies";
 import Layout from "./layout";
-import Supplies from "./Components/Supplies";
 
 function App() {
   return (

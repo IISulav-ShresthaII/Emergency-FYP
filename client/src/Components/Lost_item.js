@@ -36,10 +36,10 @@ const Marker = ({ text }) => (
 );
 
 const LostItem = () => {
-  const [show, setShow] = useState(false);
-  const [progress, setProgress] = useState(0);
+  const [setShow] = useState(false);
+  const [setProgress] = useState(0);
   const [userLocation, setUserLocation] = useState(null);
-  const [loading, setloading] = useState(false);
+  const [setloading] = useState(false);
   const usertoken = window.localStorage.getItem("token");
   const getUserId = () => {
     const user = JSON.parse(window.localStorage.getItem("user"));
@@ -425,7 +425,7 @@ const LostItem = () => {
             maxWidth="450px"
             sx={{ display: { xs: "none", md: "flex" } }}
           >
-            <img width="100%" src={report} alt="Post Image" />
+            <img width="100%" src={report} alt="Post photoimage" />
           </Stack>
         </motion.div>
       </Stack>

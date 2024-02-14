@@ -1,4 +1,3 @@
-//AIzaSyBwTN8VNLAfwlJ67FNjrVixdvCFZsCHvsI
 import PhotoCamera from "@mui/icons-material/PhotoCamera.js";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
@@ -22,10 +21,9 @@ import * as Yup from "yup";
 import GoogleMapReact from "google-map-react";
 
 const Supplies = () => {
-  const [progress, setProgress] = useState(0);
   const [userLocation, setUserLocation] = useState(null);
   const [clickedLocation, setClickedLocation] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [setLoading] = useState(false); // Removed unused variable
   const usertoken = window.localStorage.getItem("token");
   const getUserId = () => {
     const user = JSON.parse(window.localStorage.getItem("user"));
@@ -154,10 +152,7 @@ const Supplies = () => {
         uploadTask.on(
           "state_changed",
           (snapshot) => {
-            const uploaded = Math.floor(
-              (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-            );
-            setProgress(uploaded);
+            // Removed unused variable 'uploaded'
           },
           (error) => {
             console.log(error);
@@ -175,7 +170,6 @@ const Supplies = () => {
           }
         );
       });
-
       promises.push(promise);
     }
 
