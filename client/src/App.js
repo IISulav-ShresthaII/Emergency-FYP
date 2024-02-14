@@ -10,7 +10,9 @@ import Home from "./Components/Home";
 import ItemPage from "./Components/ItemPage";
 import LostItem from "./Components/Lost_item";
 import MyListings from "./Components/MyListings";
+import MySupplies from "./Components/mySupplies";
 import Layout from "./layout";
+import Supplies from "./Components/Supplies";
 
 function App() {
   return (
@@ -24,7 +26,9 @@ function App() {
           <Route path="/founditems" element={<FoundItems />} />
           <Route path="/postitem" element={<LostItem />} />
           {/* <Route path="/Manual" element={<Manual />} /> */}
+          <Route path="/Supplies" element={<Supplies />} />
           <Route path="/mylistings" element={<MyListings />} />
+          <Route path="/mysupplies" element={<MySupplies />} />
           <Route path="/:item" element={<ItemPage />} />
           <Route path="/*" element={<Home />} />
         </Routes>

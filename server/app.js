@@ -8,6 +8,7 @@ import dotenv from "dotenv";
 
 import userRoutes from "./routes/userRoutes.js";
 import ItemRoutes from "./routes/ItemRoutes.js";
+import SuppliesRoutes from "./routes/SuppliesRoutes.js";
 // import ManualRoutes from "./routes/manualRoutes.js";
 
 const app = express();
@@ -33,7 +34,7 @@ app.use((_req, res, next) => {
 app.use("/users", userRoutes);
 // app.use("/Manual", ManualRoutes);
 app.use("/Items", ItemRoutes);
-
+app.use("/Supplies", SuppliesRoutes);
 const port = process.env.PORT || 4000;
 const db = process.env.DB;
 

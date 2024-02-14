@@ -79,6 +79,20 @@ function Navbar() {
                 Home
               </Button>
             </motion.div>
+            <motion.div
+              whileHover={{ scale: [null, 1.05, 1.05] }}
+              transition={{ duration: 0.4 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Button
+                component={Link}
+                to="/postitem"
+                sx={buttonStyle}
+                disableRipple
+              >
+                Report an Emergency
+              </Button>
+            </motion.div>
             <Stack>
               <motion.div
                 whileHover={{ scale: [null, 1.05, 1.05] }}
@@ -123,20 +137,6 @@ function Navbar() {
                 </MenuItem>
               </Menu>
             </Stack>
-            <motion.div
-              whileHover={{ scale: [null, 1.05, 1.05] }}
-              transition={{ duration: 0.4 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <Button
-                component={Link}
-                to="/postitem"
-                sx={buttonStyle}
-                disableRipple
-              >
-                Post Item
-              </Button>
-            </motion.div>
 
             <motion.div
               whileHover={{ scale: [null, 1.05, 1.05] }}
@@ -150,6 +150,34 @@ function Navbar() {
                 disableRipple
               >
                 My Reports
+              </Button>
+            </motion.div>
+            <motion.div
+              whileHover={{ scale: [null, 1.05, 1.05] }}
+              transition={{ duration: 0.4 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Button
+                component={Link}
+                to="/supplies"
+                sx={buttonStyle}
+                disableRipple
+              >
+                Donate
+              </Button>
+            </motion.div>
+            <motion.div
+              whileHover={{ scale: [null, 1.05, 1.05] }}
+              transition={{ duration: 0.4 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Button
+                component={Link}
+                to="/mySupplies"
+                sx={buttonStyle}
+                disableRipple
+              >
+                My Donations
               </Button>
             </motion.div>
           </Stack>
