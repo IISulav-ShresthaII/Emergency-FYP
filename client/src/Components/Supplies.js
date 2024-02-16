@@ -1,5 +1,5 @@
 //AIzaSyBwTN8VNLAfwlJ67FNjrVixdvCFZsCHvsI
-import PhotoCamera from "@mui/icons-material/PhotoCamera.js";
+import PhotoCamera from "@mui/icons-material/PhotoCamera";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
@@ -27,6 +27,7 @@ const Supplies = () => {
   const [clickedLocation, setClickedLocation] = useState(null);
   const [loading, setLoading] = useState(false);
   const usertoken = window.localStorage.getItem("token");
+
   const getUserId = () => {
     const user = JSON.parse(window.localStorage.getItem("user"));
     return user ? user._id : null;
@@ -55,16 +56,7 @@ const Supplies = () => {
           console.error("Error getting user location:", error);
           toast.error(
             "Error getting user location. Please check browser settings.",
-            {
-              position: "bottom-right",
-              autoClose: 5000,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
-              theme: "light",
-            }
+            { position: "bottom-right" }
           );
         }
       );
@@ -72,13 +64,6 @@ const Supplies = () => {
       console.error("Geolocation is not supported by this browser.");
       toast.error("Geolocation is not supported by this browser.", {
         position: "bottom-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
       });
     }
   };
@@ -100,29 +85,13 @@ const Supplies = () => {
       await schema.validate(values, { abortEarly: false });
     } catch (error) {
       const errorMessages = error.inner.map((err) => err.message);
-      toast.error(errorMessages.join("\n"), {
-        position: "bottom-right",
-        autoClose: 1000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
+      toast.error(errorMessages.join("\n"), { position: "bottom-right" });
       return;
     }
 
     if (!image || image.length === 0) {
       toast.error("Please upload at least one image", {
         position: "bottom-right",
-        autoClose: 1000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
       });
       return;
     }
@@ -130,13 +99,6 @@ const Supplies = () => {
     if (!clickedLocation) {
       toast.error("Please select a location on the map", {
         position: "bottom-right",
-        autoClose: 1000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
       });
       return;
     }
@@ -196,13 +158,6 @@ const Supplies = () => {
           .then(() => {
             toast.success("Supply listed successfully.", {
               position: "bottom-right",
-              autoClose: 1000,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
-              theme: "light",
             });
             setLoading(false);
             window.location.href = "/mySupplies";
@@ -211,13 +166,6 @@ const Supplies = () => {
             console.log("An error occurred:", error);
             toast.error("Oops 🙁! Something went wrong.", {
               position: "bottom-right",
-              autoClose: 1000,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
-              theme: "light",
             });
             setLoading(false);
           });
@@ -226,29 +174,29 @@ const Supplies = () => {
         console.log("An error occurred:", error);
         toast.error("Oops 🙁! Something went wrong.", {
           position: "bottom-right",
-          autoClose: 1000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
         });
         setLoading(false);
       });
   };
 
   return (
-    <Stack width="100%" pt="60px" alignItems="center">
-      <Typography fontSize="30px" color="primary" fontWeight="">
-        If you are having an emergency or you are helping post here!
+    <Stack width="100%" pt={{ xs: "20px", md: "60px" }} alignItems="center">
+      <Typography
+        variant="h4"
+        color="primary"
+        fontWeight="bold"
+        textAlign="center"
+      >
+        If you are having an emergency or you are helping, post here!
       </Typography>
       <Stack
         width="100%"
         maxWidth="1440px"
         direction="row"
-        justifyContent={{ xs: "center", md: "space-evenly" }}
+        justifyContent="center"
         alignItems="center"
+        spacing={4}
+        px={{ xs: 2, sm: 4 }}
       >
         <Formik
           initialValues={{
@@ -264,15 +212,12 @@ const Supplies = () => {
           }}
         >
           {({ values, handleChange }) => (
-            <Container component="main" maxWidth="sm" sx={{ mb: 4 }}>
-              <Paper
-                variant="outlined"
-                sx={{ my: { xs: 12, md: 6 }, p: { xs: 12, md: 5 } }}
-              >
+            <Container component="main" maxWidth="md">
+              <Paper variant="outlined" sx={{ p: 3 }}>
                 <Form>
-                  <Grid item xs={6} pt="10px">
-                    <Typography variant="h6">Picture</Typography>
-                    <Stack direction="row" alignItems="center" spacing={2}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                      <Typography variant="h6">Picture</Typography>
                       <Button
                         variant="contained"
                         component="label"
@@ -285,35 +230,32 @@ const Supplies = () => {
                           multiple
                           type="file"
                           id="image"
-                          label="Upload Image"
                           name="image"
                           onChange={handleImageUpload}
                         />
                       </Button>
-                    </Stack>
-                    <Grid item xs={12}>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
                       <TextField
                         required
                         id="name"
                         name="name"
                         label="Supply Name"
-                        size="small"
                         fullWidth
-                        variant="standard"
+                        variant="outlined"
                         value={values.name}
                         onChange={handleChange}
                       />
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid item xs={12} sm={6}>
                       <TextField
-                        label="Description "
-                        id="date"
+                        label="Description"
+                        id="description"
                         name="description"
-                        multiline={true}
-                        size="small"
+                        multiline
                         required
                         fullWidth
-                        variant="standard"
+                        variant="outlined"
                         value={values.description}
                         onChange={handleChange}
                       />
@@ -368,11 +310,10 @@ const Supplies = () => {
                       <TextField
                         required
                         fullWidth
-                        variant="standard"
+                        variant="outlined"
                         id="location"
                         name="location"
                         label="Where is it located?"
-                        size="small"
                         value={values.location}
                         onChange={handleChange}
                       />
@@ -381,22 +322,24 @@ const Supplies = () => {
                       <TextField
                         required
                         fullWidth
-                        variant="standard"
+                        variant="outlined"
                         id="number"
                         name="number"
-                        label="How can we contact you? "
-                        size="small"
+                        label="How can we contact you?"
                         value={values.number}
                         onChange={handleChange}
                       />
                     </Grid>
-                    <Grid item xs={6}>
+                    <Grid item xs={12}>
                       <motion.div whileTap={{ scale: 1.05 }}>
-                        <Stack spacing={2} direction="row">
-                          <Button type="submit" variant="contained">
-                            Create post
-                          </Button>
-                        </Stack>
+                        <Button
+                          type="submit"
+                          variant="contained"
+                          fullWidth
+                          disabled={loading}
+                        >
+                          {loading ? "Creating post..." : "Create post"}
+                        </Button>
                       </motion.div>
                     </Grid>
                   </Grid>

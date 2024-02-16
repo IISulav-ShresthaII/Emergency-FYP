@@ -1,4 +1,5 @@
-import PhotoCamera from "@mui/icons-material/PhotoCamera.js";
+//AIzaSyBwTN8VNLAfwlJ67FNjrVixdvCFZsCHvsI
+import PhotoCamera from "@mui/icons-material/PhotoCamera";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
@@ -21,11 +22,11 @@ import {
 } from "@mui/material";
 import { Formik, Form } from "formik";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { storage } from "../firebase.js";
+import { storage } from "../firebase";
 import * as Yup from "yup";
-import report from "../img/report.svg";
 import GoogleMapReact from "google-map-react";
 import markerIcon from "../img/marker.svg";
+import report from "../img/report.svg";
 
 const Marker = ({ text }) => (
   <img
@@ -36,15 +37,10 @@ const Marker = ({ text }) => (
 );
 
 const LostItem = () => {
-  const [show, setShow] = useState(false);
   const [progress, setProgress] = useState(0);
   const [userLocation, setUserLocation] = useState(null);
-  const [loading, setloading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const usertoken = window.localStorage.getItem("token");
-  const getUserId = () => {
-    const user = JSON.parse(window.localStorage.getItem("user"));
-    return user ? user._id : null;
-  };
 
   const config = { headers: { token: usertoken } };
   const [image, setImage] = useState(null);
@@ -139,7 +135,7 @@ const LostItem = () => {
       return;
     }
 
-    setloading(true);
+    setLoading(true);
     const promises = [];
 
     for (let i = 0; i < image.length; i++) {
@@ -198,8 +194,7 @@ const LostItem = () => {
               progress: undefined,
               theme: "light",
             });
-            setloading(false);
-            setShow(false);
+            setLoading(false);
             window.location.href = "/mylistings";
           })
           .catch((error) => {
@@ -214,7 +209,7 @@ const LostItem = () => {
               progress: undefined,
               theme: "light",
             });
-            setloading(false);
+            setLoading(false);
           });
       })
       .catch((error) => {
@@ -229,26 +224,31 @@ const LostItem = () => {
           progress: undefined,
           theme: "light",
         });
-        setloading(false);
+        setLoading(false);
       });
   };
 
   return (
-    <Stack width="100%" pt="60px" alignItems="center">
-      <Typography fontSize="30px" color="primary" fontWeight="">
+    <Stack width="100%" pt={{ xs: 4, md: 8 }} alignItems="center">
+      <Typography
+        fontSize={{ xs: "22px", md: "30px" }}
+        color="primary"
+        fontWeight=""
+      >
         If you are having an emergency or you are helping post here!
       </Typography>
       <Stack
         width="100%"
         maxWidth="1440px"
-        direction="row"
+        direction={{ xs: "column-reverse", md: "row" }}
         justifyContent={{ xs: "center", md: "space-evenly" }}
         alignItems="center"
+        spacing={4}
+        mt={4}
       >
         <Formik
           initialValues={{
             name: "",
-            userId: getUserId(),
             description: "",
             type: "",
             location: "",
@@ -261,43 +261,40 @@ const LostItem = () => {
           }}
         >
           {({ values, handleChange }) => (
-            <Container component="main" maxWidth="sm" sx={{ mb: 4 }}>
-              <Paper
-                variant="outlined"
-                sx={{ my: { xs: 12, md: 6 }, p: { xs: 12, md: 5 } }}
-              >
+            <Container component="main" maxWidth="sm">
+              <Paper variant="outlined" sx={{ p: 4 }}>
                 <Form>
-                  <Grid item xs={6} pt="10px">
-                    <Typography variant="h6">Picture</Typography>
-                    <Stack direction="row" alignItems="center" spacing={2}>
-                      <Button
-                        variant="contained"
-                        component="label"
-                        endIcon={<PhotoCamera />}
-                      >
-                        Upload
-                        <input
-                          hidden
-                          accept="image/*"
-                          multiple
-                          type="file"
-                          id="image"
-                          label="Upload Image"
-                          name="image"
-                          onChange={handleImageUpload}
-                        />
-                      </Button>
-                    </Stack>
-                    <Grid item xs={6}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                      <Typography variant="h6">Picture</Typography>
+                      <Stack direction="row" alignItems="center" spacing={2}>
+                        <Button
+                          variant="contained"
+                          component="label"
+                          endIcon={<PhotoCamera />}
+                        >
+                          Upload
+                          <input
+                            hidden
+                            accept="image/*"
+                            multiple
+                            type="file"
+                            id="image"
+                            name="image"
+                            onChange={handleImageUpload}
+                          />
+                        </Button>
+                      </Stack>
+                    </Grid>
+                    <Grid item xs={12}>
                       <Typography variant="h6">Emergency Details</Typography>
                     </Grid>
-                    <Grid item xs={12} sm={6}>
+                    <Grid item xs={12}>
                       <TextField
                         required
                         id="name"
                         name="name"
                         label="Details"
-                        size="small"
                         fullWidth
                         variant="standard"
                         value={values.name}
@@ -306,11 +303,11 @@ const LostItem = () => {
                     </Grid>
                     <Grid item xs={12}>
                       <TextField
-                        label="Description "
+                        label="Description"
                         id="date"
                         name="description"
-                        multiline={true}
-                        size="small"
+                        multiline
+                        rows={4}
                         required
                         fullWidth
                         variant="standard"
@@ -346,7 +343,6 @@ const LostItem = () => {
                         id="location"
                         name="location"
                         label="Where did it happen?"
-                        size="small"
                         value={values.location}
                         onChange={handleChange}
                       />
@@ -359,7 +355,6 @@ const LostItem = () => {
                         id="date"
                         name="date"
                         label=" "
-                        size="small"
                         type="date"
                         value={values.date}
                         onChange={handleChange}
@@ -372,41 +367,33 @@ const LostItem = () => {
                         variant="standard"
                         id="number"
                         name="number"
-                        label="How can we contact you? "
-                        size="small"
+                        label="How can we contact you?"
                         value={values.number}
                         onChange={handleChange}
                       />
                     </Grid>
-                    <FormControl
-                      variant="standard"
-                      sx={{ m: 1, minWidth: 120 }}
-                    >
-                      <InputLabel id="demo-simple-select-standard-label">
-                        State
-                      </InputLabel>
-                      <Select
-                        labelId="demo-simple-select-standard-label"
-                        id="demo-simple-select-standard"
-                        name="type"
-                        value={values.type}
-                        onChange={handleChange}
-                      >
-                        <MenuItem value="Report">Reporting</MenuItem>
-                        <MenuItem value="Help">Helping</MenuItem>
-                      </Select>
-                      <FormHelperText>
-                        Please select the type of item
-                      </FormHelperText>
-                    </FormControl>
-                    <Grid item xs={6}>
-                      <motion.div whileTap={{ scale: 1.05 }}>
-                        <Stack spacing={2} direction="row">
-                          <Button type="submit" variant="contained">
-                            Create post
-                          </Button>
-                        </Stack>
-                      </motion.div>
+                    <Grid item xs={12}>
+                      <FormControl variant="standard" fullWidth>
+                        <InputLabel id="type-label">State</InputLabel>
+                        <Select
+                          labelId="type-label"
+                          id="type"
+                          name="type"
+                          value={values.type}
+                          onChange={handleChange}
+                        >
+                          <MenuItem value="Report">Reporting</MenuItem>
+                          <MenuItem value="Help">Helping</MenuItem>
+                        </Select>
+                        <FormHelperText>
+                          Please select the type of item
+                        </FormHelperText>
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Button type="submit" variant="contained" fullWidth>
+                        {loading ? "Creating..." : "Create post"}
+                      </Button>
                     </Grid>
                   </Grid>
                 </Form>
@@ -423,7 +410,6 @@ const LostItem = () => {
             alignItems="center"
             width="100%"
             maxWidth="450px"
-            sx={{ display: { xs: "none", md: "flex" } }}
           >
             <img width="100%" src={report} alt="Post Image" />
           </Stack>

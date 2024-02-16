@@ -23,7 +23,7 @@ const Paginationn = ({ page, setPage, max }) => {
 
   return (
     <Pagination
-      sx={{ pt: "80px" }}
+      sx={{ pt: "400px" }}
       count={Math.ceil(max)}
       page={page}
       onChange={handleChange}

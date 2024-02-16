@@ -22,7 +22,7 @@ const Paginationn = ({ page, setPage, max }) => {
 
   return (
     <Pagination
-      sx={{ pt: "80px" }}
+      sx={{ pt: "400px" }}
       count={Math.ceil(max)}
       page={page}
       onChange={handleChange}
@@ -205,6 +205,8 @@ export default function Feed() {
           height="125px"
           overflow="hidden"
           ml={{ xs: 3, sm: 5, md: 10 }}
+          pt="10px" // Adjusted padding top
+          pb="10px" // Adjusted padding bottom
         >
           <>
             <Typography
@@ -219,7 +221,7 @@ export default function Feed() {
         </Stack>
       </Stack>
       <Stack
-        pt="20px"
+        pt="10px"
         direction="row"
         justifyContent={"center"}
         flexWrap="wrap"
