@@ -11,7 +11,8 @@ export const validateJWT = async (req, res, next) => {
     if (!token) {
       return res.status(401).json({
         ok: false,
-        msg: "Access denied",
+        error: "Unauthorized",
+        message: "Access denied. No token provided.",
       });
     }
 
@@ -20,10 +21,11 @@ export const validateJWT = async (req, res, next) => {
     req.id = payload.id;
     return next();
   } catch (error) {
-    console.log(error);
-    return res.status(200).json({
+    console.error("JWT validation error:", error);
+    return res.status(401).json({
       ok: false,
-      msg: "Token not valid",
+      error: "Unauthorized",
+      message: "Token not valid or expired.",
     });
   }
 };

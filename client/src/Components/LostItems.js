@@ -240,7 +240,7 @@ export default function LostItems() {
               color="white"
               fontWeight="bold"
             >
-              Here you can Report!
+              The are all the emergencies reported till now!
             </Typography>
           </>
         </Stack>

@@ -1,5 +1,5 @@
-//responsive
-import PhotoCamera from "@mui/icons-material/PhotoCamera.js";
+//AIzaSyBwTN8VNLAfwlJ67FNjrVixdvCFZsCHvsI
+import PhotoCamera from "@mui/icons-material/PhotoCamera";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
@@ -17,26 +17,29 @@ import {
 } from "@mui/material";
 import { Formik, Form } from "formik";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { storage } from "../firebase.js";
+import { storage } from "../firebase";
 import * as Yup from "yup";
 import GoogleMapReact from "google-map-react";
 
 const Supplies = () => {
   const [userLocation, setUserLocation] = useState(null);
   const [clickedLocation, setClickedLocation] = useState(null);
-  const [setLoading] = useState(false); // Removed unused variable
+  const [image, setImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [mapCenter, setMapCenter] = useState(null);
   const usertoken = window.localStorage.getItem("token");
+
   const getUserId = () => {
     const user = JSON.parse(window.localStorage.getItem("user"));
     return user ? user._id : null;
   };
 
   const config = { headers: { token: usertoken } };
-  const [image, setImage] = useState(null);
 
   const schema = Yup.object().shape({
     name: Yup.string().required("Supply name is required"),
-    description: Yup.string().required("Description is required"),
+    amount: Yup.number().required("Amount is required"),
+    type: Yup.string().required("Item type is required"),
     location: Yup.string().required("Location is required"),
     number: Yup.string().required("Phone number is required"),
   });
@@ -49,21 +52,16 @@ const Supplies = () => {
             lat: position.coords.latitude,
             lng: position.coords.longitude,
           });
+          setMapCenter({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
         },
         (error) => {
           console.error("Error getting user location:", error);
           toast.error(
             "Error getting user location. Please check browser settings.",
-            {
-              position: "bottom-right",
-              autoClose: 5000,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
-              theme: "light",
-            }
+            { position: "bottom-right" }
           );
         }
       );
@@ -71,13 +69,6 @@ const Supplies = () => {
       console.error("Geolocation is not supported by this browser.");
       toast.error("Geolocation is not supported by this browser.", {
         position: "bottom-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
       });
     }
   };
@@ -88,10 +79,13 @@ const Supplies = () => {
 
   const handleMapClick = ({ lat, lng }) => {
     setClickedLocation({ lat, lng });
+    setMapCenter({ lat, lng });
   };
 
   const handleImageUpload = (e) => {
-    setImage(e.target.files);
+    const selectedImage = e.target.files[0];
+    setImage(selectedImage);
+    setImagePreview(URL.createObjectURL(selectedImage));
   };
 
   const handleSubmit = async (values) => {
@@ -99,142 +93,74 @@ const Supplies = () => {
       await schema.validate(values, { abortEarly: false });
     } catch (error) {
       const errorMessages = error.inner.map((err) => err.message);
-      toast.error(errorMessages.join("\n"), {
-        position: "bottom-right",
-        autoClose: 1000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
+      toast.error(errorMessages.join("\n"), { position: "bottom-right" });
       return;
     }
 
-    if (!image || image.length === 0) {
-      toast.error("Please upload at least one image", {
-        position: "bottom-right",
-        autoClose: 1000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
+    if (!image) {
+      toast.error("Please upload an image", { position: "bottom-right" });
       return;
     }
 
     if (!clickedLocation) {
       toast.error("Please select a location on the map", {
         position: "bottom-right",
-        autoClose: 1000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
       });
       return;
     }
 
-    setLoading(true);
-    const promises = [];
+    const imageName = `${Date.now()}_${image.name}`;
+    const storageRef = ref(storage, `/images/${imageName}`);
+    const fileRef = ref(storageRef, imageName);
+    const uploadTask = uploadBytesResumable(fileRef, image);
 
-    for (let i = 0; i < image.length; i++) {
-      const img = image[i];
-      const imageName = `${Date.now()}_${img.name}`;
-      const storageRef = ref(storage, `/images/${imageName}`);
-      const fileRef = ref(storageRef, imageName);
-      const uploadTask = uploadBytesResumable(fileRef, img);
-      const promise = new Promise((resolve, reject) => {
-        uploadTask.on(
-          "state_changed",
-          (snapshot) => {
-            // Removed unused variable 'uploaded'
-          },
-          (error) => {
-            console.log(error);
-            reject(error);
-          },
-          () => {
-            getDownloadURL(uploadTask.snapshot.ref)
-              .then((imgUrl) => {
-                resolve(imgUrl);
+    uploadTask.on(
+      "state_changed",
+      (snapshot) => {},
+      (error) => {
+        console.error(error);
+        toast.error("Failed to upload image", { position: "bottom-right" });
+      },
+      () => {
+        getDownloadURL(uploadTask.snapshot.ref)
+          .then((imgUrl) => {
+            const newSupplies = {
+              ...values,
+              img: imgUrl,
+              latitude: clickedLocation.lat,
+              longitude: clickedLocation.lng,
+            };
+            axios
+              .post(
+                "http://localhost:4000/Supplies/newSupplies",
+                newSupplies,
+                config
+              )
+              .then(() => {
+                toast.success("Supply listed successfully.", {
+                  position: "bottom-right",
+                });
+                window.location.href = "/mySupplies";
               })
               .catch((error) => {
-                console.log(error);
-                reject(error);
+                console.log("An error occurred:", error);
+                toast.error("Oops 🙁! Something went wrong.", {
+                  position: "bottom-right",
+                });
               });
-          }
-        );
-      });
-      promises.push(promise);
-    }
-
-    Promise.all(promises)
-      .then((urls) => {
-        const newSupplies = {
-          ...values,
-          img: urls,
-          latitude: clickedLocation.lat,
-          longitude: clickedLocation.lng,
-        };
-        axios
-          .post(
-            "http://localhost:4000/Supplies/newSupplies",
-            newSupplies,
-            config
-          )
-          .then(() => {
-            toast.success("Supply listed successfully.", {
-              position: "bottom-right",
-              autoClose: 1000,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
-              theme: "light",
-            });
-            setLoading(false);
-            window.location.href = "/mySupplies";
           })
           .catch((error) => {
-            console.log("An error occurred:", error);
-            toast.error("Oops 🙁! Something went wrong.", {
+            console.error(error);
+            toast.error("Failed to get image URL", {
               position: "bottom-right",
-              autoClose: 1000,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
-              theme: "light",
             });
-            setLoading(false);
           });
-      })
-      .catch((error) => {
-        console.log("An error occurred:", error);
-        toast.error("Oops 🙁! Something went wrong.", {
-          position: "bottom-right",
-          autoClose: 1000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
-        setLoading(false);
-      });
+      }
+    );
   };
 
   return (
-    <Stack width="100%" pt="60px" alignItems="center">
+    <Stack pt="60px" alignItems="center">
       <Typography fontSize="30px" color="primary" fontWeight="">
         If you are having an emergency or you are helping post here!
       </Typography>
@@ -242,16 +168,17 @@ const Supplies = () => {
         width="100%"
         maxWidth="1440px"
         direction="row"
-        justifyContent={{ xs: "center", md: "space-evenly" }}
+        justifyContent="center"
         alignItems="center"
       >
         <Formik
           initialValues={{
             name: "",
             userId: getUserId(),
-            description: "",
+            amount: "",
             location: "",
             number: "",
+            type: "donation", // Set default type as "donation"
           }}
           validationSchema={schema}
           onSubmit={(values) => {
@@ -260,56 +187,62 @@ const Supplies = () => {
         >
           {({ values, handleChange }) => (
             <Container component="main" maxWidth="sm" sx={{ mb: 4 }}>
-              <Paper
-                variant="outlined"
-                sx={{ my: { xs: 12, md: 6 }, p: { xs: 12, md: 5 } }}
-              >
+              <Paper variant="outlined" sx={{ my: 2, p: 2 }}>
                 <Form>
-                  <Grid item xs={6} pt="10px">
-                    <Typography variant="h6">Picture</Typography>
-                    <Stack direction="row" alignItems="center" spacing={2}>
-                      <Button
-                        variant="contained"
-                        component="label"
-                        endIcon={<PhotoCamera />}
-                      >
-                        Upload
+                  <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                      <Typography variant="h6">Picture</Typography>
+                      <Stack direction="row" alignItems="center" spacing={2}>
                         <input
-                          hidden
                           accept="image/*"
+                          id="contained-button-file"
                           multiple
                           type="file"
-                          id="image"
-                          label="Upload Image"
-                          name="image"
+                          hidden
                           onChange={handleImageUpload}
                         />
-                      </Button>
-                    </Stack>
+                        <label htmlFor="contained-button-file">
+                          <Button
+                            variant="contained"
+                            component="span"
+                            endIcon={<PhotoCamera />}
+                          >
+                            Upload
+                          </Button>
+                        </label>
+                      </Stack>
+                      {imagePreview && (
+                        <img
+                          src={imagePreview}
+                          alt="Selected"
+                          style={{ marginTop: "10px", maxWidth: "100%" }}
+                        />
+                      )}
+                    </Grid>
                     <Grid item xs={12}>
                       <TextField
                         required
+                        fullWidth
+                        variant="standard"
                         id="name"
                         name="name"
                         label="Supply Name"
                         size="small"
-                        fullWidth
-                        variant="standard"
                         value={values.name}
                         onChange={handleChange}
                       />
                     </Grid>
                     <Grid item xs={12}>
                       <TextField
-                        label="Description "
-                        id="date"
-                        name="description"
-                        multiline={true}
-                        size="small"
-                        required
+                        label="Amount"
+                        id="amount"
+                        name="amount"
+                        multiline
+                        rows={4}
                         fullWidth
+                        required
                         variant="standard"
-                        value={values.description}
+                        value={values.amount}
                         onChange={handleChange}
                       />
                     </Grid>
@@ -328,7 +261,7 @@ const Supplies = () => {
                                 "visualization",
                               ],
                             }}
-                            defaultCenter={userLocation}
+                            defaultCenter={mapCenter}
                             defaultZoom={18}
                           >
                             {clickedLocation && (
@@ -379,19 +312,22 @@ const Supplies = () => {
                         variant="standard"
                         id="number"
                         name="number"
-                        label="How can we contact you? "
+                        label="How can we contact you?"
                         size="small"
                         value={values.number}
                         onChange={handleChange}
                       />
                     </Grid>
-                    <Grid item xs={6}>
+                    <Grid item xs={12}>
                       <motion.div whileTap={{ scale: 1.05 }}>
-                        <Stack spacing={2} direction="row">
-                          <Button type="submit" variant="contained">
-                            Create post
-                          </Button>
-                        </Stack>
+                        <Button
+                          type="submit"
+                          fullWidth
+                          variant="contained"
+                          sx={{ mt: 3, mb: 2 }}
+                        >
+                          Create Post
+                        </Button>
                       </motion.div>
                     </Grid>
                   </Grid>

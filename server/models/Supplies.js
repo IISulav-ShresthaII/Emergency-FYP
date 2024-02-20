@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const SuppliesSchema = new mongoose.Schema({
   name: { type: String, required: true },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  description: { type: String, required: true },
+  amount: { type: Number, required: true },
   location: { type: String, required: true },
   latitude: { type: Number, required: true },
   longitude: { type: Number, required: true },
@@ -14,6 +14,7 @@ const SuppliesSchema = new mongoose.Schema({
       default: "https://i.ibb.co/DpZ3qy2/Untitled-design-10.png",
     },
   ],
+  type: { type: String, default: "donation" },
   createdAt: { type: Date, default: Date.now },
 });
 

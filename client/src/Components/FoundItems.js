@@ -237,7 +237,7 @@ export default function FoundItems() {
               color="white"
               fontWeight="bold"
             >
-              Here you can find the Reports
+              Here are all the rescuses on the way!
             </Typography>
           </>
         </Stack>

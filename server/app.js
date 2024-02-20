@@ -21,7 +21,7 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 
 app.use((_req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*"); // update to match the domain you will make the request from
+  res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Credentials", "true");
   res.header(
     "Access-Control-Allow-Headers",
@@ -35,14 +35,15 @@ app.use("/users", userRoutes);
 // app.use("/Manual", ManualRoutes);
 app.use("/Items", ItemRoutes);
 app.use("/Supplies", SuppliesRoutes);
+
 const port = process.env.PORT || 4000;
 const db = process.env.DB;
 
 mongoose
   .connect(db, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() =>
-    app.listen(port, () =>
+  .then(() => {
+    app.listen(port, "0.0.0.0", () =>
       console.log("Connection done and running on PORT :" + port)
-    )
-  )
+    );
+  })
   .catch((err) => console.log(err.message));

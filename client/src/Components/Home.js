@@ -43,7 +43,7 @@ const Home = () => {
   //   }
   // };
   return (
-    <Stack width="100%" gap="100px" alignItems="center" pt="100px">
+    <Stack width="100%" gap="100px" alignItems="center" pt="1px">
       <Stack
         width="100%"
         alignItems="center"
@@ -56,7 +56,7 @@ const Home = () => {
           alignItems="flex-end"
           gap={10}
           maxWidth="1440px"
-          py="20px"
+          py="0px"
         >
           <Stack
             width="100%"

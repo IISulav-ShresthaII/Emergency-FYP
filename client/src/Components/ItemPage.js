@@ -129,7 +129,7 @@ function ItemPage() {
                       alignItems="center"
                     >
                       <Avatar
-                        src={data?.userId?.img}
+                        src={data?.userId?.img || ""} // Add null check and provide a fallback value
                         sx={{
                           width: { xs: 80, sm: 95, md: 110 },
                           height: { xs: 80, sm: 95, md: 110 },

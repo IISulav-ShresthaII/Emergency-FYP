@@ -1,20 +1,23 @@
-//responsive
-import React, { useEffect, useState } from "react";
+// /AIzaSyBwTN8VNLAfwlJ67FNjrVixdvCFZsCHvsI
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { FcAbout } from "react-icons/fc";
-import { FcOvertime } from "react-icons/fc";
-import { Link } from "react-router-dom";
-import { setConstraint } from "../constraints";
+import RoomIcon from "@mui/icons-material/Room";
+import { ShoppingCart } from "@mui/icons-material";
+import { FcAbout, FcOvertime } from "react-icons/fc";
 import {
-  Button,
   Typography,
   Card,
   CardContent,
   Avatar,
   Stack,
   Pagination,
+  Button,
+  Paper,
 } from "@mui/material";
 import Axios from "axios";
+import GoogleMapReact from "google-map-react";
+
+const Marker = () => <RoomIcon style={{ color: "red", fontSize: 30 }} />;
 
 const Paginationn = ({ page, setPage, max }) => {
   const handleChange = (event, page) => {
@@ -33,159 +36,78 @@ const Paginationn = ({ page, setPage, max }) => {
   );
 };
 
-export default function Feed() {
-  const getUserId = () => {
-    const user = JSON.parse(window.localStorage.get("user")); // eslint-disable-next-line
-    return user ? user : null;
+const SupplyMap = ({ latitude, longitude, onClose }) => {
+  const defaultProps = {
+    center: {
+      lat: parseFloat(latitude),
+      lng: parseFloat(longitude),
+    },
+    zoom: 17,
   };
-  const user_info = getUserId();
-  setConstraint(true); // eslint-disable-next-line
 
-  const [supplies, setsupplies] = useState("");
+  return (
+    <Paper
+      elevation={3}
+      style={{
+        position: "absolute",
+        zIndex: 9999,
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+      }}
+    >
+      <Button onClick={onClose}>Close Map</Button>
+      <div style={{ height: "calc(100% - 48px)", width: "100%" }}>
+        <GoogleMapReact
+          bootstrapURLKeys={{
+            key: "AIzaSyBwTN8VNLAfwlJ67FNjrVixdvCFZsCHvsI",
+          }}
+          defaultCenter={defaultProps.center}
+          defaultZoom={defaultProps.zoom}
+        >
+          <Marker lat={defaultProps.center.lat} lng={defaultProps.center.lng} />
+        </GoogleMapReact>
+      </div>
+    </Paper>
+  );
+};
+
+const MySupplies = () => {
+  const [supplies, setSupplies] = useState([]);
   const [page, setPage] = useState(1);
   const [maxPages, setMaxPages] = useState(1);
+  const [selectedSupply, setSelectedSupply] = useState(null);
 
   const fetchData = async () => {
     try {
-      const response = await Axios.get("http://localhost:4000/suppliess"); // eslint-disable-next-line
-      const allsuppliess = response.data.suppliess.reverse();
-      const suppliessPerPage = 9;
-      const numSuppliess = allsuppliess.length;
-      setMaxPages(Math.ceil(numSuppliess / suppliessPerPage));
-      const startIndex = (page - 1) * suppliessPerPage;
-      const endIndex = startIndex + suppliessPerPage;
-      const data = allsuppliess.slice(startIndex, endIndex);
-      let suppliess = [];
-      data.forEach((supplies) => {
-        let created_date = new Date(supplies.createdAt);
-        let createdAt =
-          created_date.getHours() + ":" + created_date.getMinutes();
-        if (supplies.userId === getUserId()._id) {
-          suppliess.push(
-            <motion.div
-              whileHover={{ scale: [null, 1.05, 1.05] }}
-              transition={{ duration: 0.4 }}
-              key={supplies.name}
-            >
-              <Card
-                sx={{
-                  width: "270px",
-                  height: "400px",
-                  boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)",
-                }}
-              >
-                <CardContent
-                  sx={{
-                    borderRadius: "8px",
-                    padding: "8px",
-                    gap: "16px",
-                  }}
-                >
-                  <Stack
-                    alignItems="center"
-                    justifyContent="center"
-                    flexDirection="row"
-                    position="relative"
-                    sx={{
-                      backgroundColor: "#9CC0DF",
-                      height: "200px",
-                      borderRadius: "8px",
-                    }}
-                  >
-                    <Stack
-                      sx={{
-                        borderRadius: "7rem",
-                      }}
-                    >
-                      <Avatar
-                        src={supplies.img}
-                        sx={{
-                          width: "170px",
-                          height: "170px",
-                        }}
-                      />
-                    </Stack>
-                  </Stack>
-                  <Stack p="11px" gap="11px">
-                    <Typography
-                      noWrap
-                      gutterBottom
-                      fontSize="25px"
-                      component="div"
-                      fontWeight={"bold"}
-                      m="0"
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "flex-start",
-                        gap: "16px",
-                      }}
-                    >
-                      {supplies.name}
-                    </Typography>
-                  </Stack>
-                  <Stack direction="row" width="100%" gap="15px">
-                    <FcAbout fontSize="25px" />
-                    <Typography
-                      noWrap
-                      fontSize="16px"
-                      color="black"
-                      width="100%"
-                    >
-                      {supplies.description.toString().slice(0, 30)} ...
-                    </Typography>
-                  </Stack>
-                  <Stack
-                    pb="19px"
-                    pt="11px"
-                    direction="row"
-                    width="100%"
-                    gap="15px"
-                  >
-                    <FcOvertime fontSize="25px" />
-                    <Typography ml="5px" noWrap fontSize="16px" color="black">
-                      {createdAt}
-                    </Typography>
-                  </Stack>
-                  <motion.div whileTap={{ scale: 0.98 }}>
-                    <Button
-                      component={Link}
-                      to={`/${supplies.name}?cid=${supplies._id}&type=${supplies.type}/true`}
-                      variant={"contained"}
-                      color="primary"
-                      sx={{
-                        textTransform: "none",
-                        width: "140px",
-                        borderRadius: "8px",
-                      }}
-                    >
-                      More Details
-                    </Button>
-                  </motion.div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          );
-        }
-      });
-      setsupplies(suppliess);
+      const response = await Axios.get("http://localhost:4000/supplies");
+      const allsupplies = response.data.suppliess.reverse();
+      const suppliesPerPage = 9;
+      const numSupplies = allsupplies.length;
+      setMaxPages(Math.ceil(numSupplies / suppliesPerPage));
+      const startIndex = (page - 1) * suppliesPerPage;
+      const endIndex = startIndex + suppliesPerPage;
+      const data = allsupplies.slice(startIndex, endIndex).map((supply) => ({
+        ...supply,
+      }));
+      setSupplies(data);
     } catch (err) {
-      console.log("Error :", err);
+      console.log("Error fetching supplies:", err);
     }
   };
 
   useEffect(() => {
     fetchData();
-    // eslint-disable-next-line
   }, [page]);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      fetchData();
-    }, 3000);
+  const handleShowMap = (supply) => {
+    setSelectedSupply(supply);
+  };
 
-    return () => clearInterval(interval); // eslint-disable-next-line
-  }, []);
+  const handleCloseMap = () => {
+    setSelectedSupply(null);
+  };
 
   return (
     <>
@@ -208,16 +130,13 @@ export default function Feed() {
           overflow="hidden"
           ml={{ xs: 3, sm: 5, md: 10 }}
         >
-          <>
-            <Typography
-              fontSize={{ xs: "17px", sm: "21px", md: "23px" }}
-              color="white"
-              fontWeight="bold"
-            >
-              Here you can find the emergencies you have reported,{" "}
-              {user_info.nickname}
-            </Typography>
-          </>
+          <Typography
+            fontSize={{ xs: "17px", sm: "21px", md: "23px" }}
+            color="white"
+            fontWeight="bold"
+          >
+            Here are all supplies that you have donated.
+          </Typography>
         </Stack>
       </Stack>
       <Stack
@@ -227,10 +146,105 @@ export default function Feed() {
         flexWrap="wrap"
         gap="24px"
         maxWidth="1440px"
+        position="relative"
       >
-        {supplies}
+        {supplies.map((supply) => (
+          <motion.div
+            whileHover={{ scale: [null, 1.05, 1.05] }}
+            transition={{ duration: 0.4 }}
+            key={supply._id}
+          >
+            <Card
+              sx={{
+                width: "270px",
+                height: "400px",
+                boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)",
+              }}
+            >
+              <CardContent
+                sx={{
+                  borderRadius: "8px",
+                  padding: "8px",
+                  gap: "16px",
+                }}
+              >
+                <Stack
+                  alignItems="center"
+                  justifyContent="center"
+                  flexDirection="row"
+                  position="relative"
+                  sx={{
+                    backgroundColor: "#9CC0DF",
+                    height: "200px",
+                    borderRadius: "8px",
+                  }}
+                >
+                  <Stack
+                    sx={{
+                      borderRadius: "7rem",
+                    }}
+                  >
+                    <Avatar
+                      src={supply.img}
+                      sx={{
+                        width: "170px",
+                        height: "170px",
+                      }}
+                    />
+                  </Stack>
+                </Stack>
+                <Stack p="11px" gap="11px">
+                  <Typography
+                    noWrap
+                    gutterBottom
+                    fontSize="25px"
+                    component="div"
+                    fontWeight={"bold"}
+                    m="0"
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "flex-start",
+                      gap: "16px",
+                    }}
+                  >
+                    {supply.name}
+                  </Typography>
+                </Stack>
+                <Stack direction="row" width="100%" gap="15px">
+                  <ShoppingCart sx={{ fontSize: "25px" }} />
+                  <Typography noWrap fontSize="16px" color="black" width="100%">
+                    {supply.amount}
+                  </Typography>
+                </Stack>
+                <Stack
+                  pb="19px"
+                  pt="11px"
+                  direction="row"
+                  width="100%"
+                  gap="15px"
+                >
+                  <FcOvertime fontSize="25px" />
+                  <Typography ml="5px" noWrap fontSize="16px" color="black">
+                    {new Date(supply.createdAt).toLocaleString()}
+                  </Typography>
+                </Stack>
+                <Button onClick={() => handleShowMap(supply)}>Show Map</Button>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
       </Stack>
+      {selectedSupply && (
+        <SupplyMap
+          latitude={selectedSupply.latitude}
+          longitude={selectedSupply.longitude}
+          onClose={handleCloseMap}
+        />
+      )}
       <Paginationn page={page} setPage={setPage} max={maxPages} />
     </>
   );
-}
+};
+
+export default MySupplies;
