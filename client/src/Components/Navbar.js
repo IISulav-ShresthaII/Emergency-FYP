@@ -169,6 +169,7 @@ function Navbar() {
                   Donate
                 </Button>
               </motion.div>
+
               <motion.div
                 whileHover={{ scale: [null, 1.05, 1.05] }}
                 transition={{ duration: 0.4 }}
@@ -180,7 +181,35 @@ function Navbar() {
                   sx={buttonStyle}
                   disableRipple
                 >
-                  My Donations
+                  Your Donation History
+                </Button>
+              </motion.div>
+              <motion.div
+                whileHover={{ scale: [null, 1.05, 1.05] }}
+                transition={{ duration: 0.4 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <Button
+                  component={Link}
+                  to="/manual"
+                  sx={buttonStyle}
+                  disableRipple
+                >
+                  Manual
+                </Button>
+              </motion.div>
+              <motion.div
+                whileHover={{ scale: [null, 1.05, 1.05] }}
+                transition={{ duration: 0.4 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <Button
+                  component={Link}
+                  to="/nearbyhospitals"
+                  sx={buttonStyle}
+                  disableRipple
+                >
+                  Nearby Hospitals
                 </Button>
               </motion.div>
             </>

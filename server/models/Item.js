@@ -6,8 +6,8 @@ const ItemsSchema = new mongoose.Schema({
   description: { type: String, default: "Without description" },
   type: { type: String, enum: ["Report", "Help"], required: true },
   location: { type: String, required: true },
-  latitude: { type: Number, required: true }, // Added latitude field
-  longitude: { type: Number, required: true }, // Added longitude field
+  latitude: { type: Number, required: true }, 
+  longitude: { type: Number, required: true }, 
   date: { type: String, required: true },
   number: { type: String, required: true },
   img: [

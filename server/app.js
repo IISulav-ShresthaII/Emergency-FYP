@@ -9,7 +9,7 @@ import dotenv from "dotenv";
 import userRoutes from "./routes/userRoutes.js";
 import ItemRoutes from "./routes/ItemRoutes.js";
 import SuppliesRoutes from "./routes/SuppliesRoutes.js";
-// import ManualRoutes from "./routes/manualRoutes.js";
+import ManualRoutes from "./routes/ManualRoutes.js";
 
 const app = express();
 dotenv.config();
@@ -32,7 +32,7 @@ app.use((_req, res, next) => {
 });
 
 app.use("/users", userRoutes);
-// app.use("/Manual", ManualRoutes);
+app.use("/Manual", ManualRoutes);
 app.use("/Items", ItemRoutes);
 app.use("/Supplies", SuppliesRoutes);
 

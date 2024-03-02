@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const SuppliesSchema = new mongoose.Schema({
   name: { type: String, required: true },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  amount: { type: Number, required: true },
+  amount: { type: String, required: true },
   location: { type: String, required: true },
   latitude: { type: Number, required: true },
   longitude: { type: Number, required: true },

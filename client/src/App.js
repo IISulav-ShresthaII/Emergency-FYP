@@ -10,7 +10,8 @@ import LostItem from "./Components/Lost_item";
 import MyListings from "./Components/MyListings";
 import MySupplies from "./Components/mySupplies";
 import Supplies from "./Components/Supplies";
-// import AllSupplies from "./Components/AllSupplies";
+import Manual from "./Components/Manual";
+
 import Layout from "./layout";
 
 function App() {
@@ -23,7 +24,7 @@ function App() {
           <Route path="/sign-up" element={<Signup />} />
           <Route path="/lostitems" element={<LostItems />} />
           <Route path="/founditems" element={<FoundItems />} />
-          {/* <Route path="/allsupplies" element={<AllSupplies />} /> */}
+          <Route path="/manual" element={<Manual />} />
           <Route path="/postitem" element={<LostItem />} />
           <Route path="/Supplies" element={<Supplies />} />
           <Route path="/mylistings" element={<MyListings />} />

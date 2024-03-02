@@ -393,7 +393,7 @@ const LostItem = () => {
                           onChange={handleChange}
                         >
                           <MenuItem value="Report">Reporting</MenuItem>
-                          <MenuItem value="Help">Helping</MenuItem>
+                          <MenuItem value="Help">Rescuing</MenuItem>
                         </Select>
                         <FormHelperText>
                           Please select the type of item
