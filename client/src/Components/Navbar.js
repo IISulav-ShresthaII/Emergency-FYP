@@ -195,7 +195,21 @@ function Navbar() {
                   sx={buttonStyle}
                   disableRipple
                 >
-                  Manual
+                  Post Manual
+                </Button>
+              </motion.div>
+              <motion.div
+                whileHover={{ scale: [null, 1.05, 1.05] }}
+                transition={{ duration: 0.4 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <Button
+                  component={Link}
+                  to="/viewmanual"
+                  sx={buttonStyle}
+                  disableRipple
+                >
+                  Manuals
                 </Button>
               </motion.div>
               <motion.div
@@ -210,6 +224,20 @@ function Navbar() {
                   disableRipple
                 >
                   Nearby Hospitals
+                </Button>
+              </motion.div>
+              <motion.div
+                whileHover={{ scale: [null, 1.05, 1.05] }}
+                transition={{ duration: 0.4 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <Button
+                  component={Link}
+                  to="/nearbystations"
+                  sx={buttonStyle}
+                  disableRipple
+                >
+                  Nearby Stations
                 </Button>
               </motion.div>
             </>

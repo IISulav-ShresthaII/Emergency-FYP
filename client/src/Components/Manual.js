@@ -60,49 +60,37 @@ const Manual = () => {
       return;
     }
 
-    if (!image || image.length === 0) {
-      toast.error("Please upload at least one image", {
-        position: "bottom-right",
-        autoClose: 1000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
-      return;
-    }
-
     const promises = [];
 
-    for (let i = 0; i < image.length; i++) {
-      const img = image[i];
-      const imageName = `${Date.now()}_${img.name}`;
-      const storageRef = ref(storage, `/images/${imageName}`);
-      const fileRef = ref(storageRef, imageName);
-      const uploadTask = uploadBytesResumable(fileRef, img);
-      const promise = new Promise((resolve, reject) => {
-        uploadTask.on(
-          "state_changed",
-          (snapshot) => {},
-          (error) => {
-            console.log(error);
-            reject(error);
-          },
-          () => {
-            getDownloadURL(uploadTask.snapshot.ref)
-              .then((imgUrl) => {
-                resolve(imgUrl);
-              })
-              .catch((error) => {
-                console.log(error);
-                reject(error);
-              });
-          }
-        );
-      });
-      promises.push(promise);
+    if (image && image.length > 0) {
+      for (let i = 0; i < image.length; i++) {
+        const img = image[i];
+        const imageName = `${Date.now()}_${img.name}`;
+        const storageRef = ref(storage, `/images/${imageName}`);
+        const fileRef = ref(storageRef, imageName);
+        const uploadTask = uploadBytesResumable(fileRef, img);
+        const promise = new Promise((resolve, reject) => {
+          uploadTask.on(
+            "state_changed",
+            (snapshot) => {},
+            (error) => {
+              console.log(error);
+              reject(error);
+            },
+            () => {
+              getDownloadURL(uploadTask.snapshot.ref)
+                .then((imgUrl) => {
+                  resolve(imgUrl);
+                })
+                .catch((error) => {
+                  console.log(error);
+                  reject(error);
+                });
+            }
+          );
+        });
+        promises.push(promise);
+      }
     }
 
     Promise.all(promises)

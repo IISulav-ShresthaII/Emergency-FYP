@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
+import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 import "react-toastify/dist/ReactToastify.css";
 
 import {
@@ -18,37 +19,25 @@ import { Formik, Form } from "formik";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { storage } from "../firebase.js";
 import * as Yup from "yup";
-import GoogleMapReact from "google-map-react";
 
 // Import local SVG
 import CheckCircleIcon from "../img/donate.svg";
 
 const Supplies = () => {
-  const [userLocation, setUserLocation] = useState(null);
-  const [clickedLocation, setClickedLocation] = useState(null);
-  const [loading, setLoading] = useState(false);
-
-  const usertoken = window.localStorage.getItem("token");
-  const getUserId = () => {
-    const user = JSON.parse(window.localStorage.getItem("user"));
-    return user ? user._id : null;
-  };
-
-  const config = { headers: { token: usertoken } };
   const [image, setImage] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [defaultCenter, setDefaultCenter] = useState({ lat: 0, lng: 0 });
 
-  const schema = Yup.object().shape({
-    name: Yup.string().required("Supply name is required"),
-    amount: Yup.string().required("Amount is required"),
-    location: Yup.string().required("Location is required"),
-    number: Yup.string().required("Phone number is required"),
-  });
+  useEffect(() => {
+    getUserLocation();
+  }, []);
 
   const getUserLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setUserLocation({
+          setDefaultCenter({
             lat: position.coords.latitude,
             lng: position.coords.longitude,
           });
@@ -85,19 +74,32 @@ const Supplies = () => {
     }
   };
 
-  useEffect(() => {
-    getUserLocation();
-  }, []);
-
-  const handleMapClick = ({ lat, lng }) => {
-    setClickedLocation({ lat, lng });
+  const usertoken = window.localStorage.getItem("token");
+  const getUserId = () => {
+    const user = JSON.parse(window.localStorage.getItem("user"));
+    return user ? user._id : null;
   };
+
+  const config = { headers: { token: usertoken } };
 
   const handleImageUpload = (e) => {
     setImage(e.target.files);
   };
-
+  const handleMapClick = (event) => {
+    setSelectedLocation({
+      lat: event.latLng.lat(),
+      lng: event.latLng.lng(),
+    });
+  };
   const handleSubmit = async (values) => {
+    // Validation schema
+    const schema = Yup.object().shape({
+      name: Yup.string().required("Supply name is required"),
+      amount: Yup.string().required("Amount is required"),
+      location: Yup.string().required("Location is required"),
+      number: Yup.string().required("Phone number is required"),
+    });
+
     try {
       await schema.validate(values, { abortEarly: false });
     } catch (error) {
@@ -129,7 +131,7 @@ const Supplies = () => {
       return;
     }
 
-    if (!clickedLocation) {
+    if (!selectedLocation) {
       toast.error("Please select a location on the map", {
         position: "bottom-right",
         autoClose: 1000,
@@ -155,9 +157,7 @@ const Supplies = () => {
       const promise = new Promise((resolve, reject) => {
         uploadTask.on(
           "state_changed",
-          (snapshot) => {
-            // Removed unused variable 'uploaded'
-          },
+          (snapshot) => {},
           (error) => {
             console.log(error);
             reject(error);
@@ -182,8 +182,8 @@ const Supplies = () => {
         const newSupplies = {
           ...values,
           img: urls,
-          latitude: clickedLocation.lat,
-          longitude: clickedLocation.lng,
+          latitude: selectedLocation.lat,
+          longitude: selectedLocation.lng,
         };
         axios
           .post(
@@ -255,7 +255,6 @@ const Supplies = () => {
             location: "",
             number: "",
           }}
-          validationSchema={schema}
           onSubmit={(values) => {
             handleSubmit(values);
           }}
@@ -320,47 +319,29 @@ const Supplies = () => {
                     <Grid item xs={12}>
                       <Typography variant="h6">Location</Typography>
                       <div style={{ height: "300px", width: "100%" }}>
-                        {userLocation && (
-                          <GoogleMapReact
-                            onClick={handleMapClick}
-                            bootstrapURLKeys={{
-                              key: "AIzaSyBwTN8VNLAfwlJ67FNjrVixdvCFZsCHvsI",
-                              libraries: [
-                                "places",
-                                "geometry",
-                                "drawing",
-                                "visualization",
-                              ],
+                        <LoadScript
+                          googleMapsApiKey="AIzaSyBwTN8VNLAfwlJ67FNjrVixdvCFZsCHvsI"
+                          libraries={["places"]}
+                        >
+                          <GoogleMap
+                            mapContainerStyle={{
+                              width: "100%",
+                              height: "300px",
                             }}
-                            defaultCenter={userLocation}
-                            defaultZoom={18}
+                            center={defaultCenter}
+                            zoom={14}
+                            onClick={handleMapClick}
                           >
-                            {clickedLocation && (
-                              <div
-                                lat={clickedLocation.lat}
-                                lng={clickedLocation.lng}
-                                style={{
-                                  color: "red",
-                                  fontSize: "30px",
+                            {selectedLocation && (
+                              <Marker
+                                position={{
+                                  lat: selectedLocation.lat,
+                                  lng: selectedLocation.lng,
                                 }}
-                              >
-                                📍
-                              </div>
+                              />
                             )}
-                            {userLocation && !clickedLocation && (
-                              <div
-                                lat={userLocation.lat}
-                                lng={userLocation.lng}
-                                style={{
-                                  color: "blue",
-                                  fontSize: "30px",
-                                }}
-                              >
-                                🚩
-                              </div>
-                            )}
-                          </GoogleMapReact>
-                        )}
+                          </GoogleMap>
+                        </LoadScript>
                       </div>
                     </Grid>
                     <Grid item xs={12}>

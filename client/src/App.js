@@ -11,7 +11,9 @@ import MyListings from "./Components/MyListings";
 import MySupplies from "./Components/mySupplies";
 import Supplies from "./Components/Supplies";
 import Manual from "./Components/Manual";
+import ViewManual from "./Components/ViewManual";
 import Map from "./Components/NearbyHospitals";
+import PoliceStation from "./Components/NearbyStations";
 import Layout from "./layout";
 
 function App() {
@@ -25,9 +27,11 @@ function App() {
           <Route path="/lostitems" element={<LostItems />} />
           <Route path="/founditems" element={<FoundItems />} />
           <Route path="/manual" element={<Manual />} />
+          <Route path="/viewmanual" element={<ViewManual />} />
           <Route path="/postitem" element={<LostItem />} />
           <Route path="/Supplies" element={<Supplies />} />
           <Route path="/NearbyHospitals" element={<Map />} />
+          <Route path="/NearbyStations" element={<PoliceStation />} />
           <Route path="/mylistings" element={<MyListings />} />
           <Route path="/mysupplies" element={<MySupplies />} />
           <Route path="/:item" element={<ItemPage />} />
