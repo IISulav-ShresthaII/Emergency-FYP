@@ -1,5 +1,5 @@
 import PhotoCamera from "@mui/icons-material/PhotoCamera.js";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
@@ -18,8 +18,12 @@ import { Formik, Form } from "formik";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { storage } from "../firebase.js";
 import * as Yup from "yup";
+import GoogleMapReact from "google-map-react";
 
-const Manual = () => {
+// Import local SVG
+import CheckCircleIcon from "../img/donate.svg";
+
+const Supplies = () => {
   const [userLocation, setUserLocation] = useState(null);
   const [clickedLocation, setClickedLocation] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -34,9 +38,60 @@ const Manual = () => {
   const [image, setImage] = useState(null);
 
   const schema = Yup.object().shape({
-    title: Yup.string().required("Supply name is required"),
-    description: Yup.string().required("Amount is required"),
+    name: Yup.string().required("Supply name is required"),
+    amount: Yup.string().required("Amount is required"),
+    location: Yup.string().required("Location is required"),
+    number: Yup.string().required("Phone number is required"),
   });
+
+  const getUserLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+        },
+        (error) => {
+          console.error("Error getting user location:", error);
+          toast.error(
+            "Error getting user location. Please check browser settings.",
+            {
+              position: "bottom-right",
+              autoClose: 5000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: "light",
+            }
+          );
+        }
+      );
+    } else {
+      console.error("Geolocation is not supported by this browser.");
+      toast.error("Geolocation is not supported by this browser.", {
+        position: "bottom-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+    }
+  };
+
+  useEffect(() => {
+    getUserLocation();
+  }, []);
+
+  const handleMapClick = ({ lat, lng }) => {
+    setClickedLocation({ lat, lng });
+  };
 
   const handleImageUpload = (e) => {
     setImage(e.target.files);
@@ -74,6 +129,21 @@ const Manual = () => {
       return;
     }
 
+    if (!clickedLocation) {
+      toast.error("Please select a location on the map", {
+        position: "bottom-right",
+        autoClose: 1000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+      return;
+    }
+
+    setLoading(true);
     const promises = [];
 
     for (let i = 0; i < image.length; i++) {
@@ -85,7 +155,9 @@ const Manual = () => {
       const promise = new Promise((resolve, reject) => {
         uploadTask.on(
           "state_changed",
-          (snapshot) => {},
+          (snapshot) => {
+            // Removed unused variable 'uploaded'
+          },
           (error) => {
             console.log(error);
             reject(error);
@@ -107,12 +179,18 @@ const Manual = () => {
 
     Promise.all(promises)
       .then((urls) => {
-        const newManual = {
+        const newSupplies = {
           ...values,
           img: urls,
+          latitude: clickedLocation.lat,
+          longitude: clickedLocation.lng,
         };
         axios
-          .post("http://localhost:4000/Manual/newManual", newManual, config)
+          .post(
+            "http://localhost:4000/Supplies/newSupplies",
+            newSupplies,
+            config
+          )
           .then(() => {
             toast.success("Supply listed successfully.", {
               position: "bottom-right",
@@ -124,7 +202,8 @@ const Manual = () => {
               progress: undefined,
               theme: "light",
             });
-            window.location.href = "/manual";
+            setLoading(false);
+            window.location.href = "/mySupplies";
           })
           .catch((error) => {
             console.log("An error occurred:", error);
@@ -138,6 +217,7 @@ const Manual = () => {
               progress: undefined,
               theme: "light",
             });
+            setLoading(false);
           });
       })
       .catch((error) => {
@@ -152,13 +232,14 @@ const Manual = () => {
           progress: undefined,
           theme: "light",
         });
+        setLoading(false);
       });
   };
 
   return (
     <Stack width="100%" pt="60px" alignItems="center">
       <Typography fontSize="30px" color="primary" fontWeight="">
-        First Aid Manual
+        Make an impact today. Donate here!"
       </Typography>
       <Stack
         direction={{ xs: "column", md: "row" }}
@@ -168,8 +249,11 @@ const Manual = () => {
       >
         <Formik
           initialValues={{
-            title: "",
-            description: "",
+            name: "",
+            userId: getUserId(),
+            amount: "",
+            location: "",
+            number: "",
           }}
           validationSchema={schema}
           onSubmit={(values) => {
@@ -210,35 +294,106 @@ const Manual = () => {
                       <TextField
                         required
                         id="name"
-                        name="title"
-                        label="Title"
+                        name="name"
+                        label="Supply Name"
                         size="small"
                         fullWidth
                         variant="standard"
-                        value={values.title}
+                        value={values.name}
                         onChange={handleChange}
                       />
                     </Grid>
                     <Grid item xs={12}>
                       <TextField
-                        label="Description"
-                        id="Description"
-                        name="description"
+                        label="Amount"
+                        id="amount"
+                        name="amount"
                         multiline={true}
                         size="small"
                         required
                         fullWidth
                         variant="standard"
-                        value={values.description}
+                        value={values.amount}
                         onChange={handleChange}
                       />
                     </Grid>
-
+                    <Grid item xs={12}>
+                      <Typography variant="h6">Location</Typography>
+                      <div style={{ height: "300px", width: "100%" }}>
+                        {userLocation && (
+                          <GoogleMapReact
+                            onClick={handleMapClick}
+                            bootstrapURLKeys={{
+                              key: "AIzaSyBwTN8VNLAfwlJ67FNjrVixdvCFZsCHvsI",
+                              libraries: [
+                                "places",
+                                "geometry",
+                                "drawing",
+                                "visualization",
+                              ],
+                            }}
+                            defaultCenter={userLocation}
+                            defaultZoom={18}
+                          >
+                            {clickedLocation && (
+                              <div
+                                lat={clickedLocation.lat}
+                                lng={clickedLocation.lng}
+                                style={{
+                                  color: "red",
+                                  fontSize: "30px",
+                                }}
+                              >
+                                📍
+                              </div>
+                            )}
+                            {userLocation && !clickedLocation && (
+                              <div
+                                lat={userLocation.lat}
+                                lng={userLocation.lng}
+                                style={{
+                                  color: "blue",
+                                  fontSize: "30px",
+                                }}
+                              >
+                                🚩
+                              </div>
+                            )}
+                          </GoogleMapReact>
+                        )}
+                      </div>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        required
+                        fullWidth
+                        variant="standard"
+                        id="location"
+                        name="location"
+                        label="Where is it located?"
+                        size="small"
+                        value={values.location}
+                        onChange={handleChange}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        required
+                        fullWidth
+                        variant="standard"
+                        id="number"
+                        name="number"
+                        label="How can we contact you? "
+                        size="small"
+                        value={values.number}
+                        onChange={handleChange}
+                      />
+                    </Grid>
                     <Grid item xs={12}>
                       <motion.div whileTap={{ scale: 1.05 }}>
                         <Stack spacing={2} direction="row">
                           <Button type="submit" variant="contained">
-                            Submit
+                            Donate
                           </Button>
                         </Stack>
                       </motion.div>
@@ -249,9 +404,16 @@ const Manual = () => {
             </Container>
           )}
         </Formik>
+        <motion.img
+          src={CheckCircleIcon}
+          alt="Check Circle Icon"
+          whileTap={{ scale: 0.5 }}
+          width={500}
+          height={500}
+        />
       </Stack>
     </Stack>
   );
 };
 
-export default Manual;
+export default Supplies;

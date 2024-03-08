@@ -181,7 +181,7 @@ function Navbar() {
                   sx={buttonStyle}
                   disableRipple
                 >
-                  Your Donation History
+                  View Donations
                 </Button>
               </motion.div>
               <motion.div
