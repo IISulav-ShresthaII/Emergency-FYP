@@ -66,8 +66,7 @@ const WhiteTextField = styled(TextField)(({ theme }) => ({
 }));
 
 const StyledCard = styled(Card)(({ theme }) => ({
-  width: 270,
-  height: 270,
+  width: "100%", // Adjusted width to 100% for responsiveness
   borderRadius: 16,
   border: `1px solid ${theme.palette.primary.main}`,
 }));
@@ -81,7 +80,8 @@ const ModalContent = styled(Box)(({ theme }) => ({
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  width: 400,
+  width: "80%", // Adjusted width to 80% for responsiveness
+  maxWidth: 400, // Added maxWidth for larger screens
   backgroundColor: theme.palette.background.paper,
   border: "2px solid #000",
   boxShadow: 24,
@@ -157,7 +157,7 @@ const ViewManual = () => {
         </StyledPaper>
       </Box>
       <Stack
-        direction="row"
+        direction={{ xs: "column", sm: "row" }} // Adjusted direction for responsiveness
         justifyContent="center"
         alignItems="center"
         spacing={3}
@@ -168,6 +168,7 @@ const ViewManual = () => {
             whileHover={{ scale: 1.05 }}
             transition={{ duration: 0.4 }}
             key={supply._id}
+            sx={{ width: { xs: "100%", sm: "auto" } }} // Adjusted width for responsiveness
           >
             <StyledCard>
               <StyledCardContent>
@@ -209,7 +210,7 @@ const ViewManual = () => {
           />
           <Typography
             id="modal-modal-description"
-            sx={{ mt: 2, textAlign: "center" }} // Align description to center
+            sx={{ mt: 2, textAlign: "center" }}
           >
             {expandedCard?.description}
           </Typography>

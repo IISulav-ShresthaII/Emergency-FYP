@@ -441,7 +441,42 @@ function Navbar() {
               >
                 My Donations
               </Button>
-
+              <Button
+                component={Link}
+                to="/viewmanual"
+                sx={buttonStyle}
+                disableRipple
+                onClick={toggleDrawer}
+              >
+                Manual
+              </Button>
+              <Button
+                component={Link}
+                to="/manual"
+                sx={buttonStyle}
+                disableRipple
+                onClick={toggleDrawer}
+              >
+                Add Manual
+              </Button>
+              <Button
+                component={Link}
+                to="/NearbyHospitals"
+                sx={buttonStyle}
+                disableRipple
+                onClick={toggleDrawer}
+              >
+                Nearby Hospitals
+              </Button>
+              <Button
+                component={Link}
+                to="/NearbyStations"
+                sx={buttonStyle}
+                disableRipple
+                onClick={toggleDrawer}
+              >
+                Nearby Stations
+              </Button>
               <Button
                 variant="contained"
                 component={Link}
