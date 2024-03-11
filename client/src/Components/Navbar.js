@@ -439,7 +439,7 @@ function Navbar() {
                 disableRipple
                 onClick={toggleDrawer}
               >
-                My Donations
+                View Donations
               </Button>
               <Button
                 component={Link}
