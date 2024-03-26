@@ -112,7 +112,7 @@ const Manual = () => {
               progress: undefined,
               theme: "light",
             });
-            window.location.href = "/manual";
+            window.location.href = "/viewmanual";
           })
           .catch((error) => {
             console.log("An error occurred:", error);
