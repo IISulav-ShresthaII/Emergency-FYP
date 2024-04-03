@@ -14,6 +14,8 @@ import Manual from "./Components/Manual";
 import ViewManual from "./Components/ViewManual";
 import Map from "./Components/NearbyHospitals";
 import PoliceStation from "./Components/NearbyStations";
+import Preparedness from "./Components/Preparedness";
+import GetPreparedness from "./Components/GetPreparedness";
 import Layout from "./layout";
 
 function App() {
@@ -34,7 +36,10 @@ function App() {
           <Route path="/NearbyStations" element={<PoliceStation />} />
           <Route path="/mylistings" element={<MyListings />} />
           <Route path="/mysupplies" element={<MySupplies />} />
+          <Route path="/GetPreparedness" element={<GetPreparedness />} />
+          <Route path="/Preparedness" element={<Preparedness />} />
           <Route path="/:item" element={<ItemPage />} />
+
           <Route path="/*" element={<Home />} />
         </Routes>
         <ToastContainer />

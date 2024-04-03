@@ -47,9 +47,9 @@ function Navbar() {
 
     if (hoursSinceLastPrompt >= 24 || !lastPrompt) {
       setOpenDialog(true);
-      localStorage.setItem("lastPrompt", now.toISOString()); // Save the current time
     }
   }, []);
+
   const buttonStyle = {
     fontSize: "20px",
     fontWeight: "bold",
@@ -75,6 +75,9 @@ function Navbar() {
   return (
     <>
       {/* Desktop Navbar */}
+      <Button onClick={handleOpenDialog} sx={{ ml: 1, color: "primary.main" }}>
+        Check Preparedness
+      </Button>
 
       <Dialog
         open={openDialog}
@@ -92,21 +95,10 @@ function Navbar() {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button
-            component={Link}
-            to="/GetPreparedness"
-            onClick={handleCloseDialog}
-            color="primary"
-          >
+          <Button onClick={handleCloseDialog} color="primary">
             No, Show Me
           </Button>
-          <Button
-            component={Link}
-            to="/"
-            onClick={handleCloseDialog}
-            color="primary"
-            autoFocus
-          >
+          <Button onClick={handleCloseDialog} color="primary" autoFocus>
             Yes, I am
           </Button>
         </DialogActions>
@@ -299,47 +291,6 @@ function Navbar() {
                   disableRipple
                 >
                   Nearby Stations
-                </Button>
-              </motion.div>
-              <motion.div
-                whileHover={{ scale: [null, 1.05, 1.05] }}
-                transition={{ duration: 0.4 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <Button
-                  component={Link}
-                  to="/Preparedness"
-                  sx={buttonStyle}
-                  disableRipple
-                >
-                  Preparedness
-                </Button>
-              </motion.div>
-              <motion.div
-                whileHover={{ scale: [null, 1.05, 1.05] }}
-                transition={{ duration: 0.4 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <Button
-                  component={Link}
-                  to="/GetPreparedness"
-                  sx={buttonStyle}
-                  disableRipple
-                >
-                  Prepare
-                </Button>
-              </motion.div>
-              <motion.div
-                whileHover={{ scale: [null, 1.05, 1.05] }}
-                transition={{ duration: 0.4 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <Button
-                  onClick={handleOpenDialog}
-                  sx={buttonStyle}
-                  disableRipple
-                >
-                  Reminder
                 </Button>
               </motion.div>
             </>

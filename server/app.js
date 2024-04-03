@@ -10,7 +10,7 @@ import userRoutes from "./routes/userRoutes.js";
 import ItemRoutes from "./routes/ItemRoutes.js";
 import SuppliesRoutes from "./routes/SuppliesRoutes.js";
 import ManualRoutes from "./routes/ManualRoutes.js";
-
+import PreparednessRoutes from "./routes/PreparednessRoutes.js";
 const app = express();
 dotenv.config();
 app.use(express.json());
@@ -35,7 +35,7 @@ app.use("/users", userRoutes);
 app.use("/Manual", ManualRoutes);
 app.use("/Items", ItemRoutes);
 app.use("/Supplies", SuppliesRoutes);
-
+app.use("/Preparedness", PreparednessRoutes);
 const port = process.env.PORT || 4000;
 const db = process.env.DB;
 
