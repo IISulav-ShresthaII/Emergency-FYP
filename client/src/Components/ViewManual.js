@@ -89,11 +89,15 @@ const ModalContent = styled(Box)(({ theme }) => ({
 }));
 
 const ViewManual = () => {
+  const [user_info, setUser_info] = useState(
+    JSON.parse(localStorage.getItem("user"))
+  );
   const [manual, setManual] = useState([]);
   const [page, setPage] = useState(1);
   const [maxPages, setMaxPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [expandedCard, setExpandedCard] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(!!user_info);
 
   const fetchData = async () => {
     try {
@@ -135,6 +139,10 @@ const ViewManual = () => {
       supply.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       supply.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  if (!isLoggedIn) {
+    return <LoginPage onLogin={() => setIsLoggedIn(true)} />;
+  }
 
   return (
     <>
@@ -222,3 +230,18 @@ const ViewManual = () => {
 };
 
 export default ViewManual;
+
+function LoginPage({ onLogin }) {
+  return (
+    <div
+      style={{ display: "flex", flexDirection: "column", alignItems: "center" }}
+    >
+      <h1>Please log in to access this page</h1>
+      <Box mt={2}>
+        <Button variant="contained" color="primary" onClick={onLogin}>
+          Log In
+        </Button>
+      </Box>
+    </div>
+  );
+}

@@ -1,9 +1,9 @@
-import PhotoCamera from "@mui/icons-material/PhotoCamera.js";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import PhotoCamera from "@mui/icons-material/PhotoCamera";
 
 import {
   Container,
@@ -20,22 +20,22 @@ import { storage } from "../firebase.js";
 import * as Yup from "yup";
 
 const Manual = () => {
-  const [userLocation, setUserLocation] = useState(null);
-  const [clickedLocation, setClickedLocation] = useState(null);
-  const [loading, setLoading] = useState(false);
-
-  const usertoken = window.localStorage.getItem("token");
-  const getUserId = () => {
-    const user = JSON.parse(window.localStorage.getItem("user"));
-    return user ? user._id : null;
-  };
-
-  const config = { headers: { token: usertoken } };
+  const [userRole, setUserRole] = useState(""); // State to store user role
   const [image, setImage] = useState(null);
 
+  useEffect(() => {
+    // Fetch user role from local storage or server when component mounts
+    const user = JSON.parse(window.localStorage.getItem("user"));
+    if (user) {
+      setUserRole(user.role);
+    } else {
+      // Handle case where user is not logged in or user data is unavailable
+    }
+  }, []);
+
   const schema = Yup.object().shape({
-    title: Yup.string().required("Supply name is required"),
-    description: Yup.string().required("Amount is required"),
+    title: Yup.string().required("Title is required"),
+    description: Yup.string().required("Description is required"),
   });
 
   const handleImageUpload = (e) => {
@@ -43,105 +43,16 @@ const Manual = () => {
   };
 
   const handleSubmit = async (values) => {
-    try {
-      await schema.validate(values, { abortEarly: false });
-    } catch (error) {
-      const errorMessages = error.inner.map((err) => err.message);
-      toast.error(errorMessages.join("\n"), {
-        position: "bottom-right",
-        autoClose: 1000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
-      return;
-    }
-
-    const promises = [];
-
-    if (image && image.length > 0) {
-      for (let i = 0; i < image.length; i++) {
-        const img = image[i];
-        const imageName = `${Date.now()}_${img.name}`;
-        const storageRef = ref(storage, `/images/${imageName}`);
-        const fileRef = ref(storageRef, imageName);
-        const uploadTask = uploadBytesResumable(fileRef, img);
-        const promise = new Promise((resolve, reject) => {
-          uploadTask.on(
-            "state_changed",
-            (snapshot) => {},
-            (error) => {
-              console.log(error);
-              reject(error);
-            },
-            () => {
-              getDownloadURL(uploadTask.snapshot.ref)
-                .then((imgUrl) => {
-                  resolve(imgUrl);
-                })
-                .catch((error) => {
-                  console.log(error);
-                  reject(error);
-                });
-            }
-          );
-        });
-        promises.push(promise);
-      }
-    }
-
-    Promise.all(promises)
-      .then((urls) => {
-        const newManual = {
-          ...values,
-          img: urls,
-        };
-        axios
-          .post("http://localhost:4000/Manual/newManual", newManual, config)
-          .then(() => {
-            toast.success("Supply listed successfully.", {
-              position: "bottom-right",
-              autoClose: 1000,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
-              theme: "light",
-            });
-            window.location.href = "/viewmanual";
-          })
-          .catch((error) => {
-            console.log("An error occurred:", error);
-            toast.error("Oops 🙁! Something went wrong.", {
-              position: "bottom-right",
-              autoClose: 1000,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
-              theme: "light",
-            });
-          });
-      })
-      .catch((error) => {
-        console.log("An error occurred:", error);
-        toast.error("Oops 🙁! Something went wrong.", {
-          position: "bottom-right",
-          autoClose: 1000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
-      });
+    // Handle form submission
   };
+
+  if (userRole !== "staff") {
+    return (
+      <Typography variant="h6" color="error">
+        Access restricted. Only staff members are allowed to access this page.
+      </Typography>
+    );
+  }
 
   return (
     <Stack width="100%" pt="60px" alignItems="center">
@@ -197,7 +108,7 @@ const Manual = () => {
                     <Grid item xs={12}>
                       <TextField
                         required
-                        id="name"
+                        id="title"
                         name="title"
                         label="Title"
                         size="small"
@@ -210,7 +121,7 @@ const Manual = () => {
                     <Grid item xs={12}>
                       <TextField
                         label="Description"
-                        id="Description"
+                        id="description"
                         name="description"
                         multiline={true}
                         size="small"

@@ -145,6 +145,16 @@ const Preparedness = () => {
       });
   };
 
+  // Check user role to restrict access
+  const userRole = JSON.parse(localStorage.getItem("user"))?.role;
+  if (userRole !== "staff") {
+    return (
+      <Typography variant="h6" color="error">
+        Access restricted. Only staff members are allowed to access this page.
+      </Typography>
+    );
+  }
+
   return (
     <Stack width="100%" pt="60px" alignItems="center">
       <Typography fontSize="30px" color="primary" fontWeight="">

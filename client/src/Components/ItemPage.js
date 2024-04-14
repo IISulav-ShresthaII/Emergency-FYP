@@ -414,13 +414,13 @@ function ItemPage() {
   }, []);
 
   const delete_item = () => {
-    console.log("deleted");
+    console.log("Deleting item with ID:", item_id); // Check if item_id is correct
     axios({
       url: `http://localhost:4000/items/delete/${item_id}`,
       method: "DELETE",
     })
       .then((response) => {
-        console.log(response);
+        console.log("Delete response:", response); // Check the response from the API
         handleCloseDelete();
         toast.success("Item kicked to 🗑️ successfully!", {
           position: "bottom-right",
@@ -435,7 +435,7 @@ function ItemPage() {
         window.location.href = "/mylistings";
       })
       .catch((err) => {
-        console.log("Error" + err);
+        console.log("Error deleting item:", err); // Log any errors
       });
   };
 

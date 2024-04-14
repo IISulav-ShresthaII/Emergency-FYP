@@ -1,4 +1,3 @@
-//responsive
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { FcAbout } from "react-icons/fc";
@@ -14,6 +13,7 @@ import {
   Avatar,
   Stack,
   Pagination,
+  Box,
 } from "@mui/material";
 import Axios from "axios";
 
@@ -39,26 +39,10 @@ export default function FoundItems() {
     JSON.parse(localStorage.getItem("user"))
   );
 
-  const ReadMore = ({ children }) => {
-    const text = children;
-    const [isReadMore, setIsReadMore] = useState(true);
-    const toggleReadMore = () => {
-      setIsReadMore(!isReadMore);
-    };
-    return (
-      <p style={{ fontSize: "1rem" }} className="text">
-        {isReadMore ? text.slice(0, 15) : text}
-        <span onClick={toggleReadMore} className="read-or-hide">
-          {isReadMore ? "...." : " show less"}
-        </span>
-      </p>
-    );
-  };
-  setConstraint(true);
-
   const [item, setitem] = useState("");
   const [page, setPage] = useState(1);
   const [maxPages, setMaxPages] = useState(1);
+  const [isLoggedIn, setIsLoggedIn] = useState(!!user_info);
 
   useEffect(() => {
     Axios({
@@ -200,7 +184,11 @@ export default function FoundItems() {
       .catch((err) => {
         console.log("Error :", err);
       });
-  }, [page]);
+  }, [page, user_info]);
+
+  if (!isLoggedIn) {
+    return <LoginPage onLogin={() => setIsLoggedIn(true)} />;
+  }
 
   return (
     <>
@@ -237,7 +225,7 @@ export default function FoundItems() {
               color="white"
               fontWeight="bold"
             >
-              Here are all the rescuses on the way!
+              Here are all the rescues on the way!
             </Typography>
           </>
         </Stack>
@@ -256,5 +244,23 @@ export default function FoundItems() {
 
       <Paginationn page={page} setPage={setPage} max={maxPages} />
     </>
+  );
+}
+
+function LoginPage({ onLogin }) {
+  // You can implement your login page component here
+  return (
+    <div
+      style={{ display: "flex", flexDirection: "column", alignItems: "center" }}
+    >
+      <h1>Please log in to access this page</h1>
+      <Box mt={2}>
+        <Link to="/log-in">
+          <Button variant="contained" color="primary">
+            Log In
+          </Button>
+        </Link>
+      </Box>
+    </div>
   );
 }

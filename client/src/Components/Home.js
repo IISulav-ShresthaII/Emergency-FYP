@@ -1,47 +1,78 @@
-//made responsive
-import React from "react";
-import { Stack, Typography, Button } from "@mui/material";
+import React, { useState, useEffect } from "react";
+import {
+  Stack,
+  Typography,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+} from "@mui/material";
 import { motion } from "framer-motion";
 import bgSvg from "../img/earth.svg";
 import bgSvg2 from "../img/line.png";
+
 const Home = () => {
+  const [openDialog, setOpenDialog] = useState(false);
+  const [redirectTo, setRedirectTo] = useState(null);
+
   const isLoggedIn = JSON.parse(window.localStorage.getItem("user"));
+
+  const handleCloseDialog = () => {
+    console.log("Dialog closed");
+    setOpenDialog(false);
+  };
   const handleButtonClick = () => {
     if (isLoggedIn) {
-      // If the user is logged in, go to /feed
-      window.location.href = "/postitem";
+      setRedirectTo("/postitem");
     } else {
-      // If the user is not logged in, go to /log-in
-      window.location.href = "/log-in";
+      setRedirectTo("/log-in");
     }
   };
+
   const handleButtonClickLost = () => {
     if (isLoggedIn) {
-      // If the user is logged in, go to /feed
-      window.location.href = "/lostItems";
+      setRedirectTo("/lostItems");
     } else {
-      // If the user is not logged in, go to /log-in
-      window.location.href = "/log-in";
+      setRedirectTo("/log-in");
     }
   };
+
   const handleButtonClickFound = () => {
     if (isLoggedIn) {
-      // If the user is logged in, go to /feed
-      window.location.href = "/founditems";
+      setRedirectTo("/founditems");
     } else {
-      // If the user is not logged in, go to /log-in
-      window.location.href = "/log-in";
+      setRedirectTo("/log-in");
     }
   };
-  // const handleButtonClickManual = () => {
-  //   if (isLoggedIn) {
-  //     // If the user is logged in, go to /feed
-  //     window.location.href = "/Manual";
-  //   } else {
-  //     // If the user is not logged in, go to /log-in
-  //     window.location.href = "/log-in";
-  //   }
-  // };
+
+  const handleButtonClickManual = () => {
+    if (isLoggedIn) {
+      setRedirectTo("/Manual");
+    } else {
+      setRedirectTo("/log-in");
+    }
+  };
+
+  useEffect(() => {
+    console.log("Dialog useEffect triggered");
+    const lastPrompt = localStorage.getItem("lastPrompt");
+    const now = new Date();
+    const last = new Date(lastPrompt || 0); // Fallback to epoch if not found
+    const hoursSinceLastPrompt = Math.abs(now - last) / 36e5; // Convert diff to hours
+
+    if (hoursSinceLastPrompt >= 24 || !lastPrompt) {
+      setOpenDialog(true);
+      localStorage.setItem("lastPrompt", now.toISOString()); // Save the current time
+    }
+  }, []);
+  useEffect(() => {
+    if (redirectTo) {
+      window.location.href = redirectTo;
+    }
+  }, [redirectTo]);
+
   return (
     <Stack width="100%" gap="100px" alignItems="center" pt="1px">
       <Stack
@@ -204,7 +235,7 @@ const Home = () => {
                 whileTap={{ scale: 0.8 }}
               >
                 <Button
-                  onClick={handleButtonClick}
+                  onClick={handleButtonClickManual}
                   sx={{
                     display: "flex",
                     flexDirection: "column",
@@ -224,6 +255,38 @@ const Home = () => {
           </Stack>
         </Stack>
       </Stack>
+
+      <Dialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {"Emergency Preparedness"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Are you prepared for emergencies? It's important to have a plan.
+            Check our resources to ensure you're ready.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog} color="primary">
+            No, Show Me
+          </Button>
+          <Button
+            onClick={() => {
+              setOpenDialog(false);
+              window.location.href = "/GetPreparedness";
+            }}
+            color="primary"
+            autoFocus
+          >
+            Yes, I am
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Stack>
   );
 };

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { BsFillCaretDownFill } from "react-icons/bs";
-import { Button, Menu, MenuItem, Stack, Drawer } from "@mui/material";
+import { Button, Drawer, Menu, MenuItem, Stack } from "@mui/material";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import bgSvg from "../img/favicon.png";
@@ -14,7 +14,6 @@ function Navbar() {
   const token = window.localStorage.getItem("token");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
-
   const [anchorEl, setAnchorEl] = useState(null);
 
   const open = Boolean(anchorEl);
@@ -39,6 +38,7 @@ function Navbar() {
   const toggleDrawer = () => {
     setDrawerOpen(!drawerOpen);
   };
+
   useEffect(() => {
     const lastPrompt = localStorage.getItem("lastPrompt");
     const now = new Date();
@@ -50,6 +50,7 @@ function Navbar() {
       localStorage.setItem("lastPrompt", now.toISOString()); // Save the current time
     }
   }, []);
+
   const buttonStyle = {
     fontSize: "20px",
     fontWeight: "bold",
@@ -72,45 +73,12 @@ function Navbar() {
     window.location.href = "/log-in";
   };
 
+  // Check user role to determine which buttons to display
+  const userRole = JSON.parse(localStorage.getItem("user"))?.role;
+
   return (
     <>
       {/* Desktop Navbar */}
-
-      <Dialog
-        open={openDialog}
-        onClose={handleCloseDialog}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle id="alert-dialog-title">
-          {"Emergency Preparedness"}
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            Are you prepared for emergencies? It's important to have a plan.
-            Check our resources to ensure you're ready.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            component={Link}
-            to="/GetPreparedness"
-            onClick={handleCloseDialog}
-            color="primary"
-          >
-            No, Show Me
-          </Button>
-          <Button
-            component={Link}
-            to="/"
-            onClick={handleCloseDialog}
-            color="primary"
-            autoFocus
-          >
-            Yes, I am
-          </Button>
-        </DialogActions>
-      </Dialog>
       <Stack
         width="100%"
         direction="row"
@@ -142,6 +110,62 @@ function Navbar() {
                   Home
                 </Button>
               </motion.div>
+              {/* Display "Add Staffs" button for admin users */}
+              {userRole === "admin" && (
+                <>
+                  <motion.div
+                    whileHover={{ scale: [null, 1.05, 1.05] }}
+                    transition={{ duration: 0.4 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <Button
+                      component={Link}
+                      to="/adminstaffaddition"
+                      sx={buttonStyle}
+                      disableRipple
+                    >
+                      Add Staffs
+                    </Button>
+                  </motion.div>
+                </>
+              )}
+
+              {/* Only display for staff */}
+              {userRole === "staff" && (
+                <>
+                  <motion.div
+                    whileHover={{ scale: [null, 1.05, 1.05] }}
+                    transition={{ duration: 0.4 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <Button
+                      component={Link}
+                      to="/manual"
+                      sx={buttonStyle}
+                      disableRipple
+                    >
+                      Post Manual
+                    </Button>
+                  </motion.div>
+                  <motion.div
+                    whileHover={{ scale: [null, 1.05, 1.05] }}
+                    transition={{ duration: 0.4 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <Button
+                      component={Link}
+                      to="/Preparedness"
+                      sx={buttonStyle}
+                      disableRipple
+                    >
+                      Preparedness
+                    </Button>
+                  </motion.div>
+                </>
+              )}
+              {/* End of staff-only buttons */}
+
+              {/* Rest of the buttons */}
               <motion.div
                 whileHover={{ scale: [null, 1.05, 1.05] }}
                 transition={{ duration: 0.4 }}
@@ -201,7 +225,7 @@ function Navbar() {
                   </MenuItem>
                 </Menu>
               </Stack>
-
+              {/* Rest of the buttons */}
               <motion.div
                 whileHover={{ scale: [null, 1.05, 1.05] }}
                 transition={{ duration: 0.4 }}
@@ -230,7 +254,6 @@ function Navbar() {
                   Donate
                 </Button>
               </motion.div>
-
               <motion.div
                 whileHover={{ scale: [null, 1.05, 1.05] }}
                 transition={{ duration: 0.4 }}
@@ -243,20 +266,6 @@ function Navbar() {
                   disableRipple
                 >
                   View Donations
-                </Button>
-              </motion.div>
-              <motion.div
-                whileHover={{ scale: [null, 1.05, 1.05] }}
-                transition={{ duration: 0.4 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <Button
-                  component={Link}
-                  to="/manual"
-                  sx={buttonStyle}
-                  disableRipple
-                >
-                  Post Manual
                 </Button>
               </motion.div>
               <motion.div
@@ -299,20 +308,6 @@ function Navbar() {
                   disableRipple
                 >
                   Nearby Stations
-                </Button>
-              </motion.div>
-              <motion.div
-                whileHover={{ scale: [null, 1.05, 1.05] }}
-                transition={{ duration: 0.4 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <Button
-                  component={Link}
-                  to="/Preparedness"
-                  sx={buttonStyle}
-                  disableRipple
-                >
-                  Preparedness
                 </Button>
               </motion.div>
               <motion.div
@@ -441,227 +436,6 @@ function Navbar() {
           )}
         </Stack>
       </Stack>
-
-      {/* Mobile Drawer */}
-      <Drawer anchor="top" open={drawerOpen} onClose={toggleDrawer}>
-        <Stack
-          width="100%"
-          direction="column"
-          justifyContent="center"
-          alignItems="center"
-          borderRadius="0 0 20px 20px"
-          px={2}
-          py={2}
-          sx={{ backgroundColor: "#F6F8F8" }}
-        >
-          <Link to="/">
-            <Stack maxWidth="180px">
-              <img src={bgSvg} alt="logo" width="90%" />
-            </Stack>
-          </Link>
-          {token ? (
-            <>
-              <Button
-                component={Link}
-                to="/"
-                sx={buttonStyle}
-                disableRipple
-                onClick={toggleDrawer}
-              >
-                Home
-              </Button>
-              <Button
-                component={Link}
-                to="/postitem"
-                sx={buttonStyle}
-                disableRipple
-                onClick={toggleDrawer}
-              >
-                Report
-              </Button>
-              <Button
-                id="basic-button-mobile"
-                aria-controls={open ? "basic-menu" : undefined}
-                aria-haspopup="true"
-                aria-expanded={open ? "true" : undefined}
-                onClick={handleClick}
-                sx={buttonStyle}
-                endIcon={<BsFillCaretDownFill size="15px" />}
-                disableRipple
-              >
-                Reports/Rescue
-              </Button>
-
-              <Menu
-                id="basic-menu"
-                anchorEl={anchorEl}
-                open={open}
-                onClose={handleClose}
-                MenuListProps={{
-                  "aria-labelledby": "basic-button-mobile",
-                }}
-              >
-                <MenuItem
-                  component={Link}
-                  to="/lostItems"
-                  onClick={handleClose}
-                >
-                  Reports
-                </MenuItem>
-                <MenuItem
-                  component={Link}
-                  to="/foundItems"
-                  onClick={handleClose}
-                >
-                  Helps
-                </MenuItem>
-              </Menu>
-              <Button
-                component={Link}
-                to="/mylistings"
-                sx={buttonStyle}
-                disableRipple
-                onClick={toggleDrawer}
-              >
-                My Reports
-              </Button>
-              <Button
-                component={Link}
-                to="/supplies"
-                sx={buttonStyle}
-                disableRipple
-                onClick={toggleDrawer}
-              >
-                Donate
-              </Button>
-              <Button
-                component={Link}
-                to="/mySupplies"
-                sx={buttonStyle}
-                disableRipple
-                onClick={toggleDrawer}
-              >
-                View Donations
-              </Button>
-              <Button
-                component={Link}
-                to="/viewmanual"
-                sx={buttonStyle}
-                disableRipple
-                onClick={toggleDrawer}
-              >
-                Manual
-              </Button>
-              <Button
-                component={Link}
-                to="/manual"
-                sx={buttonStyle}
-                disableRipple
-                onClick={toggleDrawer}
-              >
-                Add Manual
-              </Button>
-              <Button
-                component={Link}
-                to="/NearbyHospitals"
-                sx={buttonStyle}
-                disableRipple
-                onClick={toggleDrawer}
-              >
-                Nearby Hospitals
-              </Button>
-              <Button
-                component={Link}
-                to="/NearbyStations"
-                sx={buttonStyle}
-                disableRipple
-                onClick={toggleDrawer}
-              >
-                Nearby Stations
-              </Button>
-              <Button
-                variant="contained"
-                component={Link}
-                onClick={signout}
-                sx={{
-                  textTransform: "none",
-                  px: "20px",
-                }}
-                size="small"
-                disableRipple
-              >
-                Logout
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button
-                component={Link}
-                to="/"
-                sx={buttonStyle}
-                disableRipple
-                onClick={toggleDrawer}
-              >
-                Home
-              </Button>
-              <Button
-                id="basic-button-mobile"
-                aria-controls={open ? "basic-menu" : undefined}
-                aria-haspopup="true"
-                aria-expanded={open ? "true" : undefined}
-                onClick={handleClick}
-                sx={buttonStyle}
-                endIcon={<BsFillCaretDownFill size="15px" />}
-                disableRipple
-              >
-                Items Browser
-              </Button>
-              <Menu
-                id="basic-menu"
-                anchorEl={anchorEl}
-                open={open}
-                onClose={handleClose}
-                MenuListProps={{
-                  "aria-labelledby": "basic-button-mobile",
-                }}
-              >
-                <MenuItem component={Link} to="/log-in" onClick={handleClose}>
-                  Reports
-                </MenuItem>
-                <MenuItem component={Link} to="/log-in" onClick={handleClose}>
-                  Help
-                </MenuItem>
-              </Menu>
-              <Button
-                variant="contained"
-                component={Link}
-                to="/log-in"
-                sx={{
-                  textTransform: "none",
-                  px: "20px",
-                }}
-                size="small"
-                disableRipple
-              >
-                Login
-              </Button>
-              <Button
-                variant="contained"
-                component={Link}
-                to="/sign-up"
-                sx={{
-                  textTransform: "none",
-                  px: "20px",
-                }}
-                size="small"
-                disableRipple
-              >
-                Sign Up
-              </Button>
-            </>
-          )}
-        </Stack>
-      </Drawer>
 
       {/* Mobile Navbar Toggle Button */}
       <Stack

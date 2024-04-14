@@ -15,7 +15,7 @@ import {
   Modal,
 } from "@mui/material";
 import Axios from "axios";
-
+import { Link } from "react-router-dom";
 const Paginationn = ({ page, setPage, max }) => {
   const handleChange = (event, page) => {
     setPage(page);
@@ -66,7 +66,7 @@ const WhiteTextField = styled(TextField)(({ theme }) => ({
 }));
 
 const StyledCard = styled(Card)(({ theme }) => ({
-  width: "100%", // Adjusted width to 100% for responsiveness
+  width: "100%",
   borderRadius: 16,
   border: `1px solid ${theme.palette.primary.main}`,
 }));
@@ -80,8 +80,8 @@ const ModalContent = styled(Box)(({ theme }) => ({
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  width: "80%", // Adjusted width to 80% for responsiveness
-  maxWidth: 400, // Added maxWidth for larger screens
+  width: "80%",
+  maxWidth: 400,
   backgroundColor: theme.palette.background.paper,
   border: "2px solid #000",
   boxShadow: 24,
@@ -89,11 +89,15 @@ const ModalContent = styled(Box)(({ theme }) => ({
 }));
 
 const GetPreparedness = () => {
+  const [user_info, setuser_info] = useState(
+    JSON.parse(localStorage.getItem("user"))
+  );
   const [Preparedness, setPreparedness] = useState([]);
   const [page, setPage] = useState(1);
   const [maxPages, setMaxPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [expandedCard, setExpandedCard] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(!!user_info);
 
   const fetchData = async () => {
     try {
@@ -137,6 +141,10 @@ const GetPreparedness = () => {
       supply.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       supply.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  if (!isLoggedIn) {
+    return <LoginPage onLogin={() => setIsLoggedIn(true)} />;
+  }
 
   return (
     <>
@@ -222,5 +230,23 @@ const GetPreparedness = () => {
     </>
   );
 };
+
+function LoginPage({ onLogin }) {
+  // You can implement your login page component here
+  return (
+    <div
+      style={{ display: "flex", flexDirection: "column", alignItems: "center" }}
+    >
+      <h1>Please log in to access this page</h1>
+      <Box mt={2}>
+        <Link to="/log-in">
+          <Button variant="contained" color="primary">
+            Log In
+          </Button>
+        </Link>
+      </Box>
+    </div>
+  );
+}
 
 export default GetPreparedness;
