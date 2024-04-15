@@ -8,7 +8,7 @@ const secretKey = process.env.SECRET_KEY;
 
 const generateJWT = async (id) => {
   const token = jwt.sign({ id }, secretKey, {
-    expiresIn: "100h",
+    expiresIn: "1h",
   });
   return token;
 };

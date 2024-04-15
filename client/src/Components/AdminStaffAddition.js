@@ -1,21 +1,22 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Typography, Stack, TextField, Button } from "@mui/material";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useNavigate } from "react-router-dom"; // Assuming you are using react-router v6
 
 function AdminStaffAddition() {
   const [nickname, setNickname] = useState("");
   const [fullname, setFullname] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [userRole, setUserRole] = useState(""); // State to store user role
+  const [userRole, setUserRole] = useState("");
+  const navigate = useNavigate(); // For navigation after actions
 
   useEffect(() => {
-    // Fetch user role from local storage or server when component mounts
     const user = JSON.parse(window.localStorage.getItem("user"));
     if (user) {
       setUserRole(user.role);
-    } else {
-      // Handle case where user is not logged in or user data is unavailable
     }
   }, []);
 
@@ -35,9 +36,36 @@ function AdminStaffAddition() {
         "http://localhost:4000/users/create",
         payload
       );
-      console.log(response.data); // Handle success response
+      if (response.status === 201) {
+        // Check if the response status is 201 Created
+        toast.success("New staff added!", {
+          position: "top-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          onClose: () => navigate("/home"), // Redirect on toast close
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+      } else {
+        throw new Error("Failed to add staff."); // Throws error if status is not 201
+      }
     } catch (error) {
-      console.error("Error creating staff:", error); // Handle error
+      console.error("Email already exist", error);
+      toast.error(
+        "Failed to add staff. " +
+          (error.response?.data?.error || "Please try again."),
+        {
+          position: "top-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        }
+      );
     }
   };
 
@@ -57,6 +85,7 @@ function AdminStaffAddition() {
       gap="20px"
       pt="10px"
     >
+      <ToastContainer />
       <Typography variant="h5">Add Staff</Typography>
       <form onSubmit={handleSubmit}>
         <Stack alignItems="center" gap={2} width="300px">

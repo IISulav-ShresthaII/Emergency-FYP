@@ -46,6 +46,7 @@ function App() {
           <Route path="/mysupplies" element={<MySupplies />} />
           <Route path="/GetPreparedness" element={<GetPreparedness />} />
           done
+          <Route path="/:item" element={<ItemPage />} />
           <Route path="/Preparedness" element={<Preparedness />} />
           <Route path="/adminstaffaddition" element={<AdminStaffAddition />} />
           <Route path="/*" element={<Home />} />

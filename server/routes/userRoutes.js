@@ -6,6 +6,7 @@ import { renewToken } from "../controllers/user/renewToken.js";
 import { updateUser } from "../controllers/user/updateUser.js";
 import { validateJWT } from "../middlewares/validateToken.js";
 import { createStaff } from "../controllers/User/CreateStaff.js";
+import { getUserData } from "../controllers/User/getUser.js";
 
 const router = express.Router();
 
@@ -14,6 +15,7 @@ router.put("/update/:id", validateJWT, updateUser);
 router.post("/login", loginUser);
 router.post("/renew", validateJWT, renewToken);
 router.post("/create-staff", validateJWT, createStaff); // New route for creating staff members
+router.get("/:id", getUserData);
 // Updated router with a new route for creating staff members
 
 export default router;

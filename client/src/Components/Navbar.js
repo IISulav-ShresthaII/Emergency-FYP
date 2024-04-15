@@ -330,7 +330,8 @@ function Navbar() {
                 whileTap={{ scale: 0.98 }}
               >
                 <Button
-                  onClick={handleOpenDialog}
+                  component={Link}
+                  to="/GetPreparedness"
                   sx={buttonStyle}
                   disableRipple
                 >
