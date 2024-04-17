@@ -17,8 +17,8 @@ import {
 import Axios from "axios";
 
 const Paginationn = ({ page, setPage, max }) => {
-  const handleChange = (event, page) => {
-    setPage(page);
+  const handleChange = (event, value) => {
+    setPage(value);
   };
 
   return (
@@ -66,7 +66,7 @@ const WhiteTextField = styled(TextField)(({ theme }) => ({
 }));
 
 const StyledCard = styled(Card)(({ theme }) => ({
-  width: "100%", // Adjusted width to 100% for responsiveness
+  width: "100%",
   borderRadius: 16,
   border: `1px solid ${theme.palette.primary.main}`,
 }));
@@ -80,8 +80,8 @@ const ModalContent = styled(Box)(({ theme }) => ({
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  width: "80%", // Adjusted width to 80% for responsiveness
-  maxWidth: 400, // Added maxWidth for larger screens
+  width: "80%",
+  maxWidth: 400,
   backgroundColor: theme.palette.background.paper,
   border: "2px solid #000",
   boxShadow: 24,
@@ -97,6 +97,11 @@ const ViewManual = () => {
   const [maxPages, setMaxPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [expandedCard, setExpandedCard] = useState(null);
+  const [editFormData, setEditFormData] = useState({
+    title: "",
+    description: "",
+    img: "",
+  });
   const [isLoggedIn, setIsLoggedIn] = useState(!!user_info);
 
   const fetchData = async () => {
@@ -108,10 +113,7 @@ const ViewManual = () => {
       setMaxPages(Math.ceil(numManual / manualPerPage));
       const startIndex = (page - 1) * manualPerPage;
       const endIndex = startIndex + manualPerPage;
-      const data = allmanual.slice(startIndex, endIndex).map((supply) => ({
-        ...supply,
-        expanded: false,
-      }));
+      const data = allmanual.slice(startIndex, endIndex);
       setManual(data);
     } catch (err) {
       console.log("Error fetching manual:", err);
@@ -128,17 +130,60 @@ const ViewManual = () => {
 
   const handleOpenModal = (supply) => {
     setExpandedCard(supply);
+    setEditFormData({
+      title: supply.title,
+      description: supply.description,
+      img: supply.img,
+    });
   };
 
   const handleCloseModal = () => {
     setExpandedCard(null);
   };
 
-  const filteredManuals = manual.filter(
-    (supply) =>
-      supply.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      supply.description.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleEditChange = (event) => {
+    setEditFormData({
+      ...editFormData,
+      [event.target.name]: event.target.value,
+    });
+  };
+
+  const handleEditSubmit = async (event, id) => {
+    event.preventDefault();
+    try {
+      const response = await Axios.put(
+        `http://localhost:4000/manual/update/${id}`,
+        editFormData
+      );
+      if (response.status === 200) {
+        setManual(
+          manual.map((item) =>
+            item._id === id ? { ...item, ...editFormData } : item
+          )
+        );
+        handleCloseModal();
+      } else {
+        console.error("Failed to update manual");
+      }
+    } catch (error) {
+      console.error("Error updating manual:", error);
+    }
+  };
+
+  const handleDeleteManual = async (id) => {
+    try {
+      const response = await Axios.delete(
+        `http://localhost:4000/manual/delete/${id}`
+      );
+      if (response.status === 200) {
+        setManual(manual.filter((item) => item._id !== id));
+      } else {
+        console.error("Failed to delete manual");
+      }
+    } catch (error) {
+      console.error("Error deleting manual:", error);
+    }
+  };
 
   if (!isLoggedIn) {
     return <LoginPage onLogin={() => setIsLoggedIn(true)} />;
@@ -165,18 +210,18 @@ const ViewManual = () => {
         </StyledPaper>
       </Box>
       <Stack
-        direction={{ xs: "column", sm: "row" }} // Adjusted direction for responsiveness
+        direction={{ xs: "column", sm: "row" }}
         justifyContent="center"
         alignItems="center"
         spacing={3}
         marginBottom={4}
       >
-        {filteredManuals.map((supply) => (
+        {manual.map((supply) => (
           <motion.div
             whileHover={{ scale: 1.05 }}
             transition={{ duration: 0.4 }}
             key={supply._id}
-            sx={{ width: { xs: "100%", sm: "auto" } }} // Adjusted width for responsiveness
+            sx={{ width: { xs: "100%", sm: "auto" } }}
           >
             <StyledCard>
               <StyledCardContent>
@@ -194,8 +239,19 @@ const ViewManual = () => {
                   sx={{ marginTop: "auto" }}
                   onClick={() => handleOpenModal(supply)}
                 >
-                  View Details
+                  {user_info.role === "staff" ? "Edit" : "View Details"}
                 </Button>
+                {user_info.role === "staff" && (
+                  <Button
+                    variant="contained"
+                    color="error"
+                    fullWidth
+                    sx={{ marginTop: 1 }}
+                    onClick={() => handleDeleteManual(supply._id)}
+                  >
+                    Delete
+                  </Button>
+                )}
               </StyledCardContent>
             </StyledCard>
           </motion.div>
@@ -209,20 +265,39 @@ const ViewManual = () => {
         aria-describedby="modal-modal-description"
       >
         <ModalContent>
-          <Typography id="modal-modal-title" variant="h6" component="h2">
-            {expandedCard?.title}
-          </Typography>
-          <Avatar
-            src={expandedCard?.img}
-            sx={{ width: 200, height: 200, margin: "0 auto" }}
-          />
-          <Typography
-            id="modal-modal-description"
-            sx={{ mt: 2, textAlign: "center" }}
-          >
-            {expandedCard?.description}
-          </Typography>
-          <Button onClick={handleCloseModal}>Close</Button>
+          <form onSubmit={(event) => handleEditSubmit(event, expandedCard._id)}>
+            <Typography variant="h6" component="h2">
+              {user_info.role === "staff" ? "Edit Manual" : "Manual Details"}
+            </Typography>
+            <TextField
+              label="Title"
+              variant="outlined"
+              name="title"
+              value={editFormData.title}
+              onChange={handleEditChange}
+              fullWidth
+              margin="normal"
+              disabled={user_info.role !== "staff"}
+            />
+            <TextField
+              label="Description"
+              variant="outlined"
+              name="description"
+              multiline
+              rows={4}
+              value={editFormData.description}
+              onChange={handleEditChange}
+              fullWidth
+              margin="normal"
+              disabled={user_info.role !== "staff"}
+            />
+            {user_info.role === "staff" && (
+              <Button type="submit" color="primary">
+                Save Changes
+              </Button>
+            )}
+            <Button onClick={handleCloseModal}>Close</Button>
+          </form>
         </ModalContent>
       </Modal>
     </>

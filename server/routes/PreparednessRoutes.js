@@ -11,7 +11,7 @@ const router = express.Router();
 router.post("/newPreparedness", validateJWT, isStaff, createPreparedness); // Apply isStaff middleware
 router.get("/:id", getPreparednessById);
 router.get("/", getAllPreparedness);
-router.put("/update/:id", validateJWT, updatePreparedness);
-router.delete("/delete/:id", validateJWT, isStaff, deletePreparedness); // Apply isStaff middleware
+router.put("/update/:id", updatePreparedness);
+router.delete("/delete/:id", deletePreparedness);
 
 export default router;

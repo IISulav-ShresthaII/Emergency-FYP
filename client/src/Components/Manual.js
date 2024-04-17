@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import PhotoCamera from "@mui/icons-material/PhotoCamera";
 
 import {
   Container,
@@ -18,41 +17,135 @@ import { Formik, Form } from "formik";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { storage } from "../firebase.js";
 import * as Yup from "yup";
+import PhotoCamera from "@mui/icons-material/PhotoCamera";
 
 const Manual = () => {
-  const [userRole, setUserRole] = useState(""); // State to store user role
+  const [userLocation, setUserLocation] = useState(null);
+  const [clickedLocation, setClickedLocation] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null); // State to store selected image URL
+
+  const usertoken = window.localStorage.getItem("token");
+  const getUserId = () => {
+    const user = JSON.parse(window.localStorage.getItem("user"));
+    return user ? user._id : null;
+  };
+
+  const config = { headers: { token: usertoken } };
   const [image, setImage] = useState(null);
 
-  useEffect(() => {
-    // Fetch user role from local storage or server when component mounts
-    const user = JSON.parse(window.localStorage.getItem("user"));
-    if (user) {
-      setUserRole(user.role);
-    } else {
-      // Handle case where user is not logged in or user data is unavailable
-    }
-  }, []);
-
   const schema = Yup.object().shape({
-    title: Yup.string().required("Title is required"),
-    description: Yup.string().required("Description is required"),
+    title: Yup.string().required("Supply name is required"),
+    description: Yup.string().required("Amount is required"),
   });
 
   const handleImageUpload = (e) => {
+    // Set the selected image
+    setSelectedImage(URL.createObjectURL(e.target.files[0]));
+    // Set the image files
     setImage(e.target.files);
   };
 
   const handleSubmit = async (values) => {
-    // Handle form submission
-  };
+    try {
+      await schema.validate(values, { abortEarly: false });
+    } catch (error) {
+      const errorMessages = error.inner.map((err) => err.message);
+      toast.error(errorMessages.join("\n"), {
+        position: "bottom-right",
+        autoClose: 1000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+      return;
+    }
 
-  if (userRole !== "staff") {
-    return (
-      <Typography variant="h6" color="error">
-        Access restricted. Only staff members are allowed to access this page.
-      </Typography>
-    );
-  }
+    const promises = [];
+
+    if (image && image.length > 0) {
+      for (let i = 0; i < image.length; i++) {
+        const img = image[i];
+        const imageName = `${Date.now()}_${img.name}`;
+        const storageRef = ref(storage, `/images/${imageName}`);
+        const fileRef = ref(storageRef, imageName);
+        const uploadTask = uploadBytesResumable(fileRef, img);
+        const promise = new Promise((resolve, reject) => {
+          uploadTask.on(
+            "state_changed",
+            (snapshot) => {},
+            (error) => {
+              console.log(error);
+              reject(error);
+            },
+            () => {
+              getDownloadURL(uploadTask.snapshot.ref)
+                .then((imgUrl) => {
+                  resolve(imgUrl);
+                })
+                .catch((error) => {
+                  console.log(error);
+                  reject(error);
+                });
+            }
+          );
+        });
+        promises.push(promise);
+      }
+    }
+
+    Promise.all(promises)
+      .then((urls) => {
+        const newManual = {
+          ...values,
+          img: urls,
+        };
+        axios
+          .post("http://localhost:4000/Manual/newManual", newManual, config)
+          .then(() => {
+            toast.success("Supply listed successfully.", {
+              position: "bottom-right",
+              autoClose: 1000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: "light",
+            });
+            window.location.href = "/viewmanual";
+          })
+          .catch((error) => {
+            console.log("An error occurred:", error);
+            toast.error("Oops 🙁! Something went wrong.", {
+              position: "bottom-right",
+              autoClose: 1000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: "light",
+            });
+          });
+      })
+      .catch((error) => {
+        console.log("An error occurred:", error);
+        toast.error("Oops 🙁! Something went wrong.", {
+          position: "bottom-right",
+          autoClose: 1000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+      });
+  };
 
   return (
     <Stack width="100%" pt="60px" alignItems="center">
@@ -86,6 +179,14 @@ const Manual = () => {
                     <Grid item xs={12}>
                       <Typography variant="h6">Picture</Typography>
                       <Stack direction="row" alignItems="center" spacing={2}>
+                        {/* Display the selected image */}
+                        {selectedImage && (
+                          <img
+                            src={selectedImage}
+                            alt="Selected"
+                            style={{ width: 200, height: "auto" }}
+                          />
+                        )}
                         <Button
                           variant="contained"
                           component="label"
@@ -105,10 +206,11 @@ const Manual = () => {
                         </Button>
                       </Stack>
                     </Grid>
+                    {/* Remaining form fields */}
                     <Grid item xs={12}>
                       <TextField
                         required
-                        id="title"
+                        id="name"
                         name="title"
                         label="Title"
                         size="small"
@@ -121,7 +223,7 @@ const Manual = () => {
                     <Grid item xs={12}>
                       <TextField
                         label="Description"
-                        id="description"
+                        id="Description"
                         name="description"
                         multiline={true}
                         size="small"
@@ -132,7 +234,6 @@ const Manual = () => {
                         onChange={handleChange}
                       />
                     </Grid>
-
                     <Grid item xs={12}>
                       <motion.div whileTap={{ scale: 1.05 }}>
                         <Stack spacing={2} direction="row">

@@ -1,9 +1,4 @@
-// /AIzaSyBwTN8VNLAfwlJ67FNjrVixdvCFZsCHvsI
 import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import RoomIcon from "@mui/icons-material/Room";
-import { ShoppingCart } from "@mui/icons-material";
-import { FcAbout, FcOvertime } from "react-icons/fc";
 import {
   Typography,
   Card,
@@ -11,30 +6,16 @@ import {
   Avatar,
   Stack,
   Pagination,
-  Button,
   Paper,
+  Button,
 } from "@mui/material";
 import Axios from "axios";
+import ToggleButton from "@mui/material/ToggleButton";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import GoogleMapReact from "google-map-react";
+import RoomIcon from "@mui/icons-material/Room";
 
 const Marker = () => <RoomIcon style={{ color: "red", fontSize: 30 }} />;
-
-const Paginationn = ({ page, setPage, max }) => {
-  const handleChange = (event, page) => {
-    setPage(page);
-  };
-
-  return (
-    <Pagination
-      sx={{ pt: "80px" }}
-      count={Math.ceil(max)}
-      page={page}
-      onChange={handleChange}
-      showLastButton
-      showFirstButton
-    />
-  );
-};
 
 const SupplyMap = ({ latitude, longitude, onClose }) => {
   const defaultProps = {
@@ -57,11 +38,18 @@ const SupplyMap = ({ latitude, longitude, onClose }) => {
         bottom: 0,
       }}
     >
-      <Button onClick={onClose}>Close Map</Button>
+      <Button
+        onClick={onClose}
+        variant="contained"
+        color="primary"
+        sx={{ position: "absolute", top: 0, right: 0, zIndex: 9999 }}
+      >
+        Close Map
+      </Button>
       <div style={{ height: "calc(100% - 48px)", width: "100%" }}>
         <GoogleMapReact
           bootstrapURLKeys={{
-            key: "AIzaSyBwTN8VNLAfwlJ67FNjrVixdvCFZsCHvsI",
+            key: "YOUR_GOOGLE_MAPS_API_KEY",
           }}
           defaultCenter={defaultProps.center}
           defaultZoom={defaultProps.zoom}
@@ -73,33 +61,88 @@ const SupplyMap = ({ latitude, longitude, onClose }) => {
   );
 };
 
+const Paginationn = ({ page, setPage, max }) => {
+  const handleChange = (event, page) => {
+    setPage(page);
+  };
+
+  return (
+    <Pagination
+      sx={{ pt: "80px" }}
+      count={Math.ceil(max)}
+      page={page}
+      onChange={handleChange}
+      showLastButton
+      showFirstButton
+    />
+  );
+};
+
 const MySupplies = () => {
   const [supplies, setSupplies] = useState([]);
   const [page, setPage] = useState(1);
   const [maxPages, setMaxPages] = useState(1);
   const [selectedSupply, setSelectedSupply] = useState(null);
-
-  const fetchData = async () => {
-    try {
-      const response = await Axios.get("http://localhost:4000/supplies");
-      const allsupplies = response.data.suppliess.reverse();
-      const suppliesPerPage = 9;
-      const numSupplies = allsupplies.length;
-      setMaxPages(Math.ceil(numSupplies / suppliesPerPage));
-      const startIndex = (page - 1) * suppliesPerPage;
-      const endIndex = startIndex + suppliesPerPage;
-      const data = allsupplies.slice(startIndex, endIndex).map((supply) => ({
-        ...supply,
-      }));
-      setSupplies(data);
-    } catch (err) {
-      console.log("Error fetching supplies:", err);
-    }
-  };
+  const [collectedStatus, setCollectedStatus] = useState({});
+  const [user_info, setUser_info] = useState(
+    JSON.parse(localStorage.getItem("user"))
+  );
 
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await Axios.get("http://localhost:4000/supplies");
+        const allsupplies = response.data.suppliess.reverse();
+        const suppliesPerPage = 8;
+        const numSupplies = allsupplies.length;
+        setMaxPages(Math.ceil(numSupplies / suppliesPerPage));
+        const startIndex = (page - 1) * suppliesPerPage;
+        const endIndex = startIndex + suppliesPerPage;
+        const data = allsupplies
+          .slice(startIndex, endIndex)
+          .map((supply) => ({ ...supply }));
+
+        // Initialize collectedStatus from local storage
+        const initialCollectedStatus = {};
+        data.forEach((supply) => {
+          const collectedValue = localStorage.getItem(
+            `collected_${supply._id}`
+          );
+          initialCollectedStatus[supply._id] = collectedValue === "yes";
+        });
+        setCollectedStatus(initialCollectedStatus);
+
+        setSupplies(data);
+      } catch (err) {
+        console.log("Error fetching supplies:", err);
+      }
+    };
+
     fetchData();
   }, [page]);
+
+  const toggleCollected = async (supplyId) => {
+    try {
+      // Update the collected status in the database
+      await Axios.put(`http://localhost:4000/supplies/update/${supplyId}`, {
+        collected: collectedStatus[supplyId] ? "no" : "yes",
+      });
+
+      // Update local storage
+      localStorage.setItem(
+        `collected_${supplyId}`,
+        collectedStatus[supplyId] ? "no" : "yes"
+      );
+
+      // Update collectedStatus state with the new value
+      setCollectedStatus((prevStatus) => ({
+        ...prevStatus,
+        [supplyId]: !prevStatus[supplyId],
+      }));
+    } catch (err) {
+      console.log("Error toggling collected status:", err);
+    }
+  };
 
   const handleShowMap = (supply) => {
     setSelectedSupply(supply);
@@ -111,128 +154,119 @@ const MySupplies = () => {
 
   return (
     <>
-      <Stack
-        direction="row"
-        width="100%"
-        sx={{ backgroundColor: "primary.main" }}
-        height="125px"
-        gap="4px"
-        alignItems="center"
-        justifyContent="center"
+      <Paper
+        sx={{
+          backgroundColor: "primary.main",
+          py: 3,
+          textAlign: "center",
+          width: "100%",
+        }}
       >
-        <Stack
-          spacing={0}
-          position="relative"
-          justifyContent="center"
-          width="100%"
-          maxWidth="1440px"
-          height="125px"
-          overflow="hidden"
-          ml={{ xs: 3, sm: 5, md: 10 }}
-        >
-          <Typography
-            fontSize={{ xs: "17px", sm: "21px", md: "23px" }}
-            color="white"
-            fontWeight="bold"
-          >
-            Here are all supplies that you have donated.
-          </Typography>
-        </Stack>
-      </Stack>
+        <Typography variant="h4" color="white" fontWeight="bold" gutterBottom>
+          Here are all supplies that you have donated.
+        </Typography>
+      </Paper>
+
       <Stack
         pt="20px"
         direction="row"
         justifyContent={"center"}
         flexWrap="wrap"
-        gap="24px"
+        gap="60px"
         maxWidth="1440px"
         position="relative"
       >
         {supplies.map((supply) => (
-          <motion.div
-            whileHover={{ scale: [null, 1.05, 1.05] }}
-            transition={{ duration: 0.4 }}
-            key={supply._id}
-          >
-            <Card
+          <Card key={supply._id} sx={{ maxWidth: 500 }}>
+            <CardContent
               sx={{
-                width: "270px",
-                height: "400px",
-                boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)",
+                border: "2px solid",
+                borderColor: (theme) => theme.palette.primary.main,
+                borderRadius: "10px",
+                backgroundColor: "#f0f0f0",
+                padding: "20px",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "16px",
               }}
             >
-              <CardContent
+              <Avatar
+                src={supply.img}
                 sx={{
-                  borderRadius: "8px",
-                  padding: "8px",
-                  gap: "16px",
+                  width: "230px",
+                  height: "200px",
                 }}
+              />
+              <Typography
+                variant="h6"
+                color="primary.main"
+                textAlign="center"
+                fontWeight="bold"
               >
-                <Stack
-                  alignItems="center"
-                  justifyContent="center"
-                  flexDirection="row"
-                  position="relative"
+                {supply.name}
+              </Typography>
+              <Typography color="text.secondary" textAlign="center">
+                {supply.amount}
+              </Typography>
+              <Typography color="text.secondary" textAlign="center">
+                {new Date(supply.createdAt).toLocaleString()}
+              </Typography>
+              {user_info.role === "staff" && (
+                <ToggleButtonGroup
+                  value={
+                    collectedStatus[supply._id] ? "collected" : "notCollected"
+                  }
+                  exclusive
+                  onChange={() => toggleCollected(supply._id)}
+                  aria-label="collected"
                   sx={{
-                    backgroundColor: "#9CC0DF",
-                    height: "200px",
-                    borderRadius: "8px",
+                    border: "2px solid black", // Add border style here
+                    borderRadius: "10px", // Optional: Add border radius
                   }}
                 >
-                  <Stack
+                  <ToggleButton
+                    value="collected"
                     sx={{
-                      borderRadius: "7rem",
+                      backgroundColor: collectedStatus[supply._id]
+                        ? "green"
+                        : "",
+                      "&.Mui-selected": {
+                        backgroundColor: collectedStatus[supply._id]
+                          ? "green"
+                          : "",
+                        borderRight: "2px solid black", // Add right border for the first button
+                      },
                     }}
                   >
-                    <Avatar
-                      src={supply.img}
-                      sx={{
-                        width: "170px",
-                        height: "170px",
-                      }}
-                    />
-                  </Stack>
-                </Stack>
-                <Stack p="11px" gap="11px">
-                  <Typography
-                    noWrap
-                    gutterBottom
-                    fontSize="25px"
-                    component="div"
-                    fontWeight={"bold"}
-                    m="0"
+                    Collected
+                  </ToggleButton>
+                  <ToggleButton
+                    value="notCollected"
                     sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "flex-start",
-                      gap: "16px",
+                      backgroundColor: collectedStatus[supply._id] ? "" : "red",
+                      "&.Mui-selected": {
+                        backgroundColor: collectedStatus[supply._id]
+                          ? ""
+                          : "red",
+                        borderLeft: "2px solid black", // Add left border for the last button
+                      },
                     }}
                   >
-                    {supply.name}
-                  </Typography>
-                </Stack>
-                <Stack direction="row" width="100%" gap="15px">
-                  <ShoppingCart sx={{ fontSize: "25px" }} />
-                  <Typography noWrap fontSize="16px" color="black" width="100%">
-                    {supply.amount}
-                  </Typography>
-                </Stack>
-                <Stack
-                  pb="19px"
-                  pt="11px"
-                  direction="row"
-                  width="100%"
-                  gap="15px"
-                >
-                  <FcOvertime fontSize="25px" />
-                  <Typography ml="5px" noWrap fontSize="16px" color="black">
-                    {new Date(supply.createdAt).toLocaleString()}
-                  </Typography>
-                </Stack>
-                <Button onClick={() => handleShowMap(supply)}>Show Map</Button>
-              </CardContent>
-            </Card>
-          </motion.div>
+                    Not Collected
+                  </ToggleButton>
+                </ToggleButtonGroup>
+              )}
+
+              <Button
+                onClick={() => handleShowMap(supply)}
+                variant="outlined"
+                color="primary"
+              >
+                Show Map
+              </Button>
+            </CardContent>
+          </Card>
         ))}
       </Stack>
       {selectedSupply && (

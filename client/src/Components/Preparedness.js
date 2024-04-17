@@ -1,10 +1,9 @@
-import PhotoCamera from "@mui/icons-material/PhotoCamera.js";
 import React, { useState } from "react";
-import axios from "axios";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
+import PhotoCamera from "@mui/icons-material/PhotoCamera";
+import axios from "axios";
 import {
   Container,
   Paper,
@@ -21,6 +20,7 @@ import * as Yup from "yup";
 
 const Preparedness = () => {
   const [loading, setLoading] = useState(false);
+  const [imagePreview, setImagePreview] = useState(null); // State to hold the image preview
 
   const usertoken = window.localStorage.getItem("token");
   const getUserId = () => {
@@ -38,6 +38,13 @@ const Preparedness = () => {
 
   const handleImageUpload = (e) => {
     setImage(e.target.files);
+
+    // Display the selected image preview
+    const reader = new FileReader();
+    reader.onload = () => {
+      setImagePreview(reader.result);
+    };
+    reader.readAsDataURL(e.target.files[0]);
   };
 
   const handleSubmit = async (values) => {
@@ -187,6 +194,13 @@ const Preparedness = () => {
                     <Grid item xs={12}>
                       <Typography variant="h6">Picture</Typography>
                       <Stack direction="row" alignItems="center" spacing={2}>
+                        {imagePreview && (
+                          <img
+                            src={imagePreview}
+                            alt="Selected"
+                            style={{ maxWidth: "200px", maxHeight: "200px" }}
+                          />
+                        )}
                         <Button
                           variant="contained"
                           component="label"

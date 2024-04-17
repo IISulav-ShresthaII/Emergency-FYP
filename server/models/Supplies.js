@@ -8,6 +8,7 @@ const SuppliesSchema = new mongoose.Schema({
   latitude: { type: Number, required: true },
   longitude: { type: Number, required: true },
   number: { type: String, required: true },
+  collected: { type: Boolean, default: false },
   img: [
     {
       type: String,

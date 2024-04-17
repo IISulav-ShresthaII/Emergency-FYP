@@ -8,10 +8,10 @@ import deleteSupplies from "../controllers/Supplies/deleteSupplies.js";
 
 const router = express.Router();
 
-router.post("/newSupplies", validateJWT, isStaff, createSupplies); // Apply isStaff middleware
+router.post("/newSupplies", createSupplies);
 router.get("/:id", getSuppliesById);
 router.get("/", getAllSupplies);
-router.put("/update/:id", validateJWT, updateSupplies);
+router.put("/update/:id", updateSupplies);
 router.delete("/delete/:id", deleteSupplies);
 
 export default router;

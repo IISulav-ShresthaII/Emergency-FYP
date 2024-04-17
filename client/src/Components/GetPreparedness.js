@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 import Axios from "axios";
 import { Link } from "react-router-dom";
+
 const Paginationn = ({ page, setPage, max }) => {
   const handleChange = (event, page) => {
     setPage(page);
@@ -98,6 +99,11 @@ const GetPreparedness = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [expandedCard, setExpandedCard] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(!!user_info);
+  const [editMode, setEditMode] = useState(false); // Track edit mode
+  const [editedSupply, setEditedSupply] = useState({
+    title: "",
+    description: "",
+  });
 
   const fetchData = async () => {
     try {
@@ -134,6 +140,61 @@ const GetPreparedness = () => {
 
   const handleCloseModal = () => {
     setExpandedCard(null);
+    setEditMode(false); // Reset edit mode when closing the modal
+  };
+
+  const handleEdit = (supply) => {
+    setEditMode(true); // Enable edit mode
+    setEditedSupply(supply); // Set the edited supply
+    setExpandedCard(supply); // Set the expanded card to the supply being edited
+  };
+
+  const handleEditChange = (event) => {
+    const { name, value } = event.target;
+    setEditedSupply((prevSupply) => ({
+      ...prevSupply,
+      [name]: value,
+    }));
+  };
+
+  const handleEditSubmit = async (event, id) => {
+    event.preventDefault(); // Prevent default form submission
+
+    try {
+      // Send a PUT request to update the preparedness item
+      const response = await Axios.put(
+        `http://localhost:4000/Preparedness/update/${id}`,
+        editedSupply
+      );
+
+      // If the request is successful, update the preparedness item in the state
+      const updatedSupply = response.data;
+      setPreparedness((prevState) =>
+        prevState.map((supply) =>
+          supply._id === updatedSupply._id ? updatedSupply : supply
+        )
+      );
+
+      // Close the modal after editing
+      handleCloseModal();
+    } catch (error) {
+      console.error("Error editing preparedness item:", error);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      // Send a DELETE request to the backend API to delete the preparedness item
+      await Axios.delete(`http://localhost:4000/Preparedness/delete/${id}`);
+
+      // Update the state to remove the deleted preparedness item
+      setPreparedness(Preparedness.filter((supply) => supply._id !== id));
+
+      // Close the modal if it's open
+      handleCloseModal();
+    } catch (error) {
+      console.error("Error deleting preparedness item:", error);
+    }
   };
 
   const filteredPreparednesss = Preparedness.filter(
@@ -145,6 +206,67 @@ const GetPreparedness = () => {
   if (!isLoggedIn) {
     return <LoginPage onLogin={() => setIsLoggedIn(true)} />;
   }
+
+  // Render modal content
+  const renderModalContent = () => {
+    if (editMode) {
+      return (
+        <form onSubmit={(event) => handleEditSubmit(event, editedSupply._id)}>
+          <Typography variant="h6" component="h2">
+            Edit Preparedness Item
+          </Typography>
+          <TextField
+            label="Title"
+            variant="outlined"
+            name="title"
+            value={editedSupply.title}
+            onChange={handleEditChange}
+            fullWidth
+            margin="normal"
+            disabled={user_info.role !== "staff"}
+          />
+          <TextField
+            label="Description"
+            variant="outlined"
+            name="description"
+            multiline
+            rows={4}
+            value={editedSupply.description}
+            onChange={handleEditChange}
+            fullWidth
+            margin="normal"
+            disabled={user_info.role !== "staff"}
+          />
+          {user_info.role === "staff" && (
+            <Button type="submit" color="primary">
+              Save Changes
+            </Button>
+          )}
+          <Button onClick={handleCloseModal}>Close</Button>
+        </form>
+      );
+    } else {
+      return (
+        <>
+          <Typography id="modal-modal-title" variant="h6" component="h2">
+            {expandedCard?.title}
+          </Typography>
+          <Avatar
+            src={expandedCard?.img}
+            sx={{ width: 200, height: 200, margin: "0 auto" }}
+          />
+          <Typography
+            id="modal-modal-description"
+            sx={{ mt: 2, textAlign: "center" }}
+          >
+            {expandedCard?.description}
+          </Typography>
+          <Button onClick={() => handleEdit(expandedCard)}>Edit</Button>
+          <Button onClick={handleCloseModal}>Close</Button>
+        </>
+      );
+    }
+  };
 
   return (
     <>
@@ -198,6 +320,28 @@ const GetPreparedness = () => {
                 >
                   View Details
                 </Button>
+                <Box mt={2}>
+                  {" "}
+                  {/* Add margin top */}
+                  {user_info.role === "staff" && (
+                    <Stack direction="row" spacing={2}>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => handleEdit(supply)}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        variant="contained"
+                        color="error"
+                        onClick={() => handleDelete(supply._id)}
+                      >
+                        Delete
+                      </Button>
+                    </Stack>
+                  )}
+                </Box>
               </StyledCardContent>
             </StyledCard>
           </motion.div>
@@ -210,22 +354,7 @@ const GetPreparedness = () => {
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
-        <ModalContent>
-          <Typography id="modal-modal-title" variant="h6" component="h2">
-            {expandedCard?.title}
-          </Typography>
-          <Avatar
-            src={expandedCard?.img}
-            sx={{ width: 200, height: 200, margin: "0 auto" }}
-          />
-          <Typography
-            id="modal-modal-description"
-            sx={{ mt: 2, textAlign: "center" }}
-          >
-            {expandedCard?.description}
-          </Typography>
-          <Button onClick={handleCloseModal}>Close</Button>
-        </ModalContent>
+        <ModalContent>{renderModalContent()}</ModalContent>
       </Modal>
     </>
   );

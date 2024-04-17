@@ -7,22 +7,28 @@ const updateManual = async (req, res) => {
   try {
     const manualUpdated = await Manual.findOneAndUpdate({ _id: id }, newData, {
       new: true,
+      runValidators: true,
     });
 
     if (manualUpdated) {
-      return res
-        .status(201)
-        .json({ ok: true, msg: "Manual Updated!", manualUpdated });
-    } else {
-      return res.status(404).json({
-        msg: "Manual doesn't exist",
+      return res.status(200).json({
+        ok: true,
+        msg: "Manual updated successfully!",
+        data: manualUpdated,
       });
+    } else {
+      return res.status(404).json({ msg: "Manual not found" });
     }
   } catch (error) {
-    console.log(error);
-    return res.status(404).json({
+    console.error(error);
+    if (error.name === "ValidationError") {
+      return res
+        .status(400)
+        .json({ ok: false, msg: "Validation error", errors: error.errors });
+    }
+    return res.status(500).json({
       ok: false,
-      msg: "An error occured, contact an administrator",
+      msg: "An error occurred, please contact the administrator",
     });
   }
 };

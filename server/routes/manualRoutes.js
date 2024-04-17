@@ -11,7 +11,7 @@ const router = express.Router();
 router.post("/newManual", validateJWT, isStaff, createManual); // Apply isStaff middleware
 router.get("/:id", getManualById);
 router.get("/", getAllManual);
-router.put("/update/:id", validateJWT, updateManual);
-router.delete("/delete/:id", validateJWT, isStaff, deleteManual); // Apply isStaff middleware
+router.put("/update/:id", updateManual);
+router.delete("/delete/:id", deleteManual); // Apply isStaff middleware
 
 export default router;
