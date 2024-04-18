@@ -1,28 +1,21 @@
 import Supplies from "../../models/Supplies.js";
 
-const getSuppliesById = async (req, res) => {
-  const { id } = req.params;
+const getTotalSupplies = async (req, res) => {
   try {
-    const supplies = await Supplies.findOne({
-      $and: [{ _id: id }],
-    }).populate({
-      path: "userId",
-      select: "_id nickname fullname img email",
-    });
+    const totalSupplies = await Supplies.countDocuments();
 
-    if (supplies) {
-      return res
-        .status(200)
-        .json({ supplies, ok: true, msg: "Supplies found" });
+    if (totalSupplies > 0) {
+      return res.json({ total: totalSupplies });
     } else {
-      return res.status(204).json({ ok: false, msg: "Supplies not found" });
+      return res.status(204).json({ ok: false, msg: "No Supplies in DB" });
     }
   } catch (error) {
     console.log(error);
     return res.status(404).json({
       ok: false,
-      msg: "An error occured, contact with admin",
+      msg: "An error occurred, contact the admin",
     });
   }
 };
-export default getSuppliesById;
+
+export default getTotalSupplies;

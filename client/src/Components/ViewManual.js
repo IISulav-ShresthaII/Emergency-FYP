@@ -121,8 +121,35 @@ const ViewManual = () => {
   };
 
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await Axios.get("http://localhost:4000/manual");
+        const allManual = response.data.manuals.reverse();
+        let filteredManual = allManual;
+
+        // Filter manual based on search term if it exists
+        if (searchTerm) {
+          filteredManual = allManual.filter(
+            (item) =>
+              item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              item.description.toLowerCase().includes(searchTerm.toLowerCase())
+          );
+        }
+
+        const manualPerPage = 9;
+        const numManual = filteredManual.length;
+        setMaxPages(Math.ceil(numManual / manualPerPage));
+        const startIndex = (page - 1) * manualPerPage;
+        const endIndex = startIndex + manualPerPage;
+        const data = filteredManual.slice(startIndex, endIndex);
+        setManual(data);
+      } catch (err) {
+        console.log("Error fetching manual:", err);
+      }
+    };
+
     fetchData();
-  }, [page]);
+  }, [page, searchTerm]);
 
   const handleSearch = (event) => {
     setSearchTerm(event.target.value);

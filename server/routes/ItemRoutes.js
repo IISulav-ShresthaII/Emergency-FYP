@@ -5,11 +5,13 @@ import getAllItems from "../controllers/Items/getAllItems.js";
 import getItemById from "../controllers/Items/getItemById.js";
 import updateItem from "../controllers/Items/updateItem.js";
 import deleteItem from "../controllers/Items/deleteItem.js";
+import chartdata from "../controllers/Items/ItemChart.js";
 const router = express.Router();
 
 router.post("/newItem", validateJWT, createItem);
-router.get("/:id", getItemById);
+router.get("/total", getItemById);
 router.get("/", getAllItems);
+router.get("/itemchart", chartdata);
 router.put("/update/:id", validateJWT, updateItem);
 router.delete("/delete/:id", deleteItem);
 

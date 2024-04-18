@@ -1,6 +1,7 @@
 import express from "express";
+import Manual from "../models/Manual.js";
 import createManual from "../controllers/Manual/CreateManual.js";
-import { validateJWT, isStaff } from "../middlewares/validateToken.js"; // Import isStaff middleware
+import { validateJWT, isStaff } from "../middlewares/validateToken.js";
 import getAllManual from "../controllers/Manual/getAllManual.js";
 import getManualById from "../controllers/Manual/getManualById.js";
 import updateManual from "../controllers/Manual/updateManual.js";
@@ -8,10 +9,10 @@ import deleteManual from "../controllers/Manual/deleteManual.js";
 
 const router = express.Router();
 
-router.post("/newManual", validateJWT, isStaff, createManual); // Apply isStaff middleware
-router.get("/:id", getManualById);
+router.post("/newManual", validateJWT, isStaff, createManual);
+router.get("/total", getManualById);
 router.get("/", getAllManual);
 router.put("/update/:id", updateManual);
-router.delete("/delete/:id", deleteManual); // Apply isStaff middleware
+router.delete("/delete/:id", deleteManual);
 
 export default router;

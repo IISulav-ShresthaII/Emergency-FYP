@@ -1,28 +1,21 @@
-import Item from '../../models/Item.js'
+import Items from "../../models/Item.js";
 
-const getItemById = async (req, res) => {
-    const { id } = req.params
-    try {
-        const item = await Item.findOne({
-            $and: [{ _id: id }],
-        })
-            
-            .populate({
-                path: 'userId',
-                select: '_id nickname fullname img email',
-            })
+const getTotalItems = async (req, res) => {
+  try {
+    const totalItems = await Items.countDocuments();
 
-        if (item) {
-            return res.status(200).json({ item, ok: true, msg: 'Item found' })
-        } else {
-            return res.status(204).json({ ok: false, msg: 'Item not found' })
-        }
-    } catch (error) {
-        console.log(error)
-        return res.status(404).json({
-            ok: false,
-            msg: 'An error occured, contact with admin',
-        })
+    if (totalItems > 0) {
+      return res.json({ total: totalItems });
+    } else {
+      return res.status(204).json({ ok: false, msg: "No items in DB" });
     }
-}
-export default getItemById
+  } catch (error) {
+    console.log(error);
+    return res.status(404).json({
+      ok: false,
+      msg: "An error occurred, contact the admin",
+    });
+  }
+};
+
+export default getTotalItems;

@@ -1,26 +1,21 @@
-import Manual from "../../models/Manual.js";
+import Preparedness from "../../models/Preparedness.js";
 
-const getManualById = async (req, res) => {
-  const { id } = req.params;
+const getTotalPreparedness = async (req, res) => {
   try {
-    const manual = await Manual.findOne({
-      $and: [{ _id: id }],
-    }).populate({
-      path: "userId",
-      select: "_id nickname fullname img email",
-    });
+    const totalPreparedness = await Preparedness.countDocuments();
 
-    if (manual) {
-      return res.status(200).json({ manual, ok: true, msg: "Manual found" });
+    if (totalPreparedness > 0) {
+      return res.json({ total: totalPreparedness });
     } else {
-      return res.status(204).json({ ok: false, msg: "Manual not found" });
+      return res.status(204).json({ ok: false, msg: "No Preparedness in DB" });
     }
   } catch (error) {
     console.log(error);
     return res.status(404).json({
       ok: false,
-      msg: "An error occured, contact with admin",
+      msg: "An error occurred, contact the admin",
     });
   }
 };
-export default getManualById;
+
+export default getTotalPreparedness;

@@ -127,6 +127,20 @@ function Navbar() {
                       Add Staffs
                     </Button>
                   </motion.div>
+                  <motion.div
+                    whileHover={{ scale: [null, 1.05, 1.05] }}
+                    transition={{ duration: 0.4 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <Button
+                      component={Link}
+                      to="/dashboard"
+                      sx={buttonStyle}
+                      disableRipple
+                    >
+                      Dashboard
+                    </Button>
+                  </motion.div>
                 </>
               )}
 
