@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Axios from "axios";
 import { Box } from "@mui/material";
-import SuppliesChart from "./charts/SuppliesChart"; // Import SuppliesChart component
-import ItemChart from "./charts/ItemChart"; // Import ItemChart component
+import Charts from "./charts/Chart"; // Import ItemChart component
 
 const Dashboard = () => {
   const [totalManuals, setTotalManuals] = useState(0);
@@ -21,6 +20,12 @@ const Dashboard = () => {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
+  };
+
+  const chartContainerStyles = {
+    backgroundColor: "#f0f0f0",
+    padding: 0,
+    borderRadius: 15,
   };
 
   useEffect(() => {
@@ -58,30 +63,33 @@ const Dashboard = () => {
       <h1>Dashboard</h1>
       <Box sx={{ display: "flex", flexDirection: "row", gap: 2 }}>
         <Box sx={boxStyles}>
-          <p>Total Manuals Created: {totalManuals}</p>
+          <p>Total Users: {totalUser}</p>
         </Box>
         <Box sx={boxStyles}>
-          <p>Total Items: {totalItems}</p>
+          <p>Total Reports: {totalItems}</p>
+        </Box>
+        <Box sx={boxStyles}>
+          <p>Total Donations: {totalSupplies}</p>
+        </Box>
+        <Box sx={boxStyles}>
+          <p>Total Manuals Created: {totalManuals}</p>
         </Box>
         <Box sx={boxStyles}>
           <p>Total Preparedness: {totalPreparedness}</p>
         </Box>
-        <Box sx={boxStyles}>
-          <p>Total Supplies: {totalSupplies}</p>
-        </Box>
-        <Box sx={boxStyles}>
-          <p>Total Users: {totalUser}</p>
-        </Box>
       </Box>
-      {/* Place SuppliesChart and ItemChart components here */}
+
       <div
-        style={{ display: "flex", justifyContent: "center", marginTop: "20px" }}
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          marginTop: "10px",
+          ...chartContainerStyles, // Apply styles to the chart container
+        }}
       >
-        <div style={{ marginRight: "20px" }}>
-          <SuppliesChart />
-        </div>
+        <div style={{ marginRight: "10px" }}>{/* <SuppliesChart /> */}</div>
         <div>
-          <ItemChart />
+          <Charts />
         </div>
       </div>
     </div>

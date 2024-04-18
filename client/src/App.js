@@ -18,7 +18,7 @@ import Preparedness from "./Components/Preparedness";
 import GetPreparedness from "./Components/GetPreparedness";
 import AdminStaffAddition from "./Components/AdminStaffAddition";
 import Dashboard from "./Components/dashboard";
-import ItemChart from "./Components/charts/ItemChart";
+
 import Layout from "./layout";
 
 function App() {
@@ -27,7 +27,6 @@ function App() {
       <Layout>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/sc" element={<ItemChart />} />
           <Route path="/log-in" element={<Login />} /> done
           <Route path="/sign-up" element={<Signup />} />
           done
