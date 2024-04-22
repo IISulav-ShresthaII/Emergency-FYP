@@ -15,8 +15,8 @@ router.get("/supplieschart", async (req, res) => {
       { $sort: { _id: 1 } },
     ]);
 
-    const labels = suppliesChartData.map((item) => item._id);
-    const data = suppliesChartData.map((item) => item.count);
+    const labels = suppliesChartData.map((supplies) => supplies._id);
+    const data = suppliesChartData.map((supplies) => supplies.count);
 
     const chartData = {
       labels: labels,
@@ -34,7 +34,7 @@ router.get("/supplieschart", async (req, res) => {
 
     res.json(chartData);
   } catch (error) {
-    console.error("Error fetching items chart data:", error);
+    console.error("Error fetching supplies chart data:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });

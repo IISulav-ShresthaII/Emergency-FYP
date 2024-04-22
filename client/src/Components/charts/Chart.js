@@ -18,18 +18,22 @@ const Charts = () => {
     const fetchData = async () => {
       try {
         const itemResponse = await axios.get(
-          "http://localhost:4000/Items/Itemchart"
+          "http://localhost:4000/Items/chart/Itemchart"
         );
         const suppliesResponse = await axios.get(
           "http://localhost:4000/Supplies/supplieschart"
         );
+        const userResponse = await axios.get(
+          "http://localhost:4000/Users/userchart"
+        );
 
         const itemData = itemResponse.data;
         const suppliesData = suppliesResponse.data;
-
+        const userData = userResponse.data;
         // Define custom color palette
-        const itemColor = "rgb(75, 192, 192)";
-        const suppliesColor = "rgb(255, 99, 132)"; // Different color for supplies data
+        const itemColor = "rgb(75, 192, 192)"; // Turquoise
+        const suppliesColor = "rgb(255, 99, 132)"; // Coral
+        const userColor = "rgb(54, 162, 235)"; // Dodger Blue
 
         // Combine data from both responses
         const combinedData = {
@@ -43,7 +47,7 @@ const Charts = () => {
                 .replace(")", ", 0.2)"),
               pointBackgroundColor: itemColor,
               fill: true,
-              tension: 0.1,
+              tension: 0.5,
               pointBorderColor: itemColor,
             })),
             ...suppliesData.datasets.map((dataset) => ({
@@ -53,9 +57,20 @@ const Charts = () => {
                 .replace("rgb", "rgba")
                 .replace(")", ", 0.2)"),
               fill: true,
-              tension: 0.1,
+              tension: 0.3,
               pointBackgroundColor: suppliesColor,
               pointBorderColor: suppliesColor,
+            })),
+            ...userData.datasets.map((dataset) => ({
+              ...dataset,
+              borderColor: userColor,
+              backgroundColor: userColor
+                .replace("rgb", "rgba")
+                .replace(")", ", 0.2)"),
+              fill: true,
+              tension: 0.1,
+              pointBackgroundColor: userColor,
+              pointBorderColor: userColor,
             })),
           ],
         };
@@ -71,7 +86,7 @@ const Charts = () => {
   }, []);
 
   return (
-    <div style={{ width: "1200px", height: "800px" }}>
+    <div style={{ width: "700px", height: "1000px" }}>
       <h2 style={{ textAlign: "center", marginBottom: "20px" }}>
         Combined Chart
       </h2>

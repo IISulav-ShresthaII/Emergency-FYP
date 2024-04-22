@@ -20,6 +20,7 @@ import AdminStaffAddition from "./Components/AdminStaffAddition";
 import Dashboard from "./Components/dashboard";
 
 import Layout from "./layout";
+import MapComponent from "./Components/charts/location";
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/log-in" element={<Login />} /> done
           <Route path="/sign-up" element={<Signup />} />
+          <Route path="/location" element={<MapComponent />} />
           done
           <Route path="/lostitems" element={<LostItems />} />
           done

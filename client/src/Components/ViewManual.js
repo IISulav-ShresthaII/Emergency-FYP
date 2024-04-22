@@ -221,7 +221,7 @@ const ViewManual = () => {
       <Box sx={{ background: "primary", width: "100%" }}>
         <StyledPaper elevation={3}>
           <Typography variant="h4" color="white" align="center" gutterBottom>
-            Welcome to the Instruction Manual Section
+            Welcome to the First Aid Manual Section
           </Typography>
           <Typography variant="body1" color="white" align="center">
             Please read and follow the instructions carefully.

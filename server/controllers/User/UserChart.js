@@ -1,11 +1,11 @@
 import express from "express";
-import Item from "../../models/Item.js";
+import User from "../../models/User.js";
 
 const router = express.Router();
 
-router.get("/chart/itemchart", async (req, res) => {
+router.get("/userchart", async (req, res) => {
   try {
-    const itemsChartData = await Item.aggregate([
+    const userChartData = await User.aggregate([
       {
         $group: {
           _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
@@ -15,14 +15,14 @@ router.get("/chart/itemchart", async (req, res) => {
       { $sort: { _id: 1 } },
     ]);
 
-    const labels = itemsChartData.map((item) => item._id);
-    const data = itemsChartData.map((item) => item.count);
+    const labels = userChartData.map((user) => user._id);
+    const data = userChartData.map((user) => user.count);
 
     const chartData = {
       labels: labels,
       datasets: [
         {
-          label: "Reports Chart",
+          label: "Users Chart",
           data: data,
           fill: false,
           backgroundColor: "rgba(75,192,192,0.4)",
@@ -34,7 +34,7 @@ router.get("/chart/itemchart", async (req, res) => {
 
     res.json(chartData);
   } catch (error) {
-    console.error("Error fetching items chart data:", error);
+    console.error("Error fetching user chart data:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
