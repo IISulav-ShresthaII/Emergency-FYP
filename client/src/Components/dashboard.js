@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Axios from "axios";
 import { Box, Paper, Typography } from "@mui/material";
-import Charts from "./charts/Chart"; // Import Chart component
+import Charts from "./charts/Chart";
 import { MapComponent } from "./charts/location";
 
 const Dashboard = () => {

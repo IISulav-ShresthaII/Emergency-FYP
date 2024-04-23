@@ -163,7 +163,7 @@ const MySupplies = () => {
         }}
       >
         <Typography variant="h4" color="white" fontWeight="bold" gutterBottom>
-          Here are all supplies that you have donated.
+          Here are all supplies that have been donated.
         </Typography>
       </Paper>
 

@@ -65,6 +65,7 @@ function Signup() {
                   if (response.data === "Done") {
                     toast.success("You are now successfully Signed up!", {
                       position: "bottom-right",
+
                       autoClose: 800,
                       hideProgressBar: false,
                       closeOnClick: true,
@@ -74,7 +75,7 @@ function Signup() {
                     });
                     window.location.href = "/log-in";
                   } else {
-                    toast.error("Something is missing!", {
+                    toast.error("Email already exists!", {
                       position: "bottom-right",
                       autoClose: 1000,
                       hideProgressBar: false,
@@ -111,7 +112,7 @@ function Signup() {
               });
               window.location.href = "/log-in";
             } else {
-              toast.error("Something is missing!", {
+              toast.error("Email already exists!", {
                 position: "bottom-right",
                 autoClose: 1000,
                 hideProgressBar: false,

@@ -4,7 +4,7 @@ import { Typography, Stack, TextField, Button } from "@mui/material";
 import { ToastContainer, toast } from "react-toastify";
 import { Link } from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css";
-import { useNavigate } from "react-router-dom"; // Assuming you are using react-router v6
+import { useNavigate } from "react-router-dom";
 
 function AdminStaffAddition() {
   const [nickname, setNickname] = useState("");
@@ -12,7 +12,7 @@ function AdminStaffAddition() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [userRole, setUserRole] = useState("");
-  const navigate = useNavigate(); // For navigation after actions
+  const navigate = useNavigate();
 
   useEffect(() => {
     const user = JSON.parse(window.localStorage.getItem("user"));
@@ -37,20 +37,20 @@ function AdminStaffAddition() {
         "http://localhost:4000/users/create",
         payload
       );
-      if (response.status === 201) {
-        // Check if the response status is 201 Created
+      if (response.status === 200) {
+        // Check if the response status is 200 Created
         toast.success("New staff added!", {
           position: "top-center",
           autoClose: 5000,
           hideProgressBar: false,
           closeOnClick: true,
-          onClose: () => navigate("/home"), // Redirect on toast close
+          onClose: () => navigate("/"), // Redirect on toast close
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
         });
       } else {
-        throw new Error("Failed to add staff."); // Throws error if status is not 201
+        throw new Error("Failed to add staff."); // Throws error if status is not 200
       }
     } catch (error) {
       console.error("Email already exist", error);

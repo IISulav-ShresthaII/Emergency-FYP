@@ -466,7 +466,7 @@ function ItemPage() {
               color="white"
               fontWeight=""
             >
-              {`${item?.type} Item`}
+              {`${item?.type}`}
             </Typography>
 
             <Typography
@@ -474,7 +474,7 @@ function ItemPage() {
               color="white"
               fontWeight="bold"
             >
-              {"Help Coming"} {item?.name}
+              {item?.name}
             </Typography>
           </Stack>
         </Stack>
