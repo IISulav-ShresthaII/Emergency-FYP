@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Typography, Stack, TextField, Button } from "@mui/material";
 import { ToastContainer, toast } from "react-toastify";
+import { Link } from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom"; // Assuming you are using react-router v6
 
@@ -73,6 +74,14 @@ function AdminStaffAddition() {
     return (
       <Typography variant="h6" color="error">
         Access restricted. Only admins are allowed to access this page.
+        <Button
+          component={Link}
+          to="/log-in"
+          variant="contained"
+          color="primary"
+        >
+          Log In
+        </Button>
       </Typography>
     );
   }

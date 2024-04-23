@@ -84,6 +84,7 @@ const Charts = () => {
 
     fetchData();
   }, []);
+  console.log(chartData);
 
   return (
     <div style={{ width: "700px", height: "1000px" }}>

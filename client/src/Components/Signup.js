@@ -36,7 +36,7 @@ function Signup() {
     const uploadImage = async () => {
       if (image) {
         const storageRef = ref(storage, `/images/${image.name}`);
-        const fileRef = ref(storageRef, image.name); // create file reference
+        const fileRef = ref(storageRef, image.name);
         const uploadTask = uploadBytesResumable(fileRef, image);
         uploadTask.on(
           "state_changed",
@@ -50,7 +50,6 @@ function Signup() {
             console.log(error);
           },
           () => {
-            // on complete
             getDownloadURL(uploadTask.snapshot.ref).then(async (imgUrl) => {
               const payload = {
                 nickname,

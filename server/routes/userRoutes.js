@@ -16,8 +16,6 @@ router.get("/total", getUserById);
 router.post("/login", loginUser);
 router.get("/userchart", userchart);
 router.post("/renew", validateJWT, renewToken);
-router.post("/create-staff", validateJWT, createStaff); // New route for creating staff members
-
-// Updated router with a new route for creating staff members
+router.post("/create-staff", validateJWT, createStaff);
 
 export default router;

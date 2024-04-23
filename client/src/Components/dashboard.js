@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Axios from "axios";
-import { Box, Paper } from "@mui/material";
-import Charts from "./charts/Chart"; // Import ItemChart component
+import { Box, Paper, Typography } from "@mui/material";
+import Charts from "./charts/Chart"; // Import Chart component
 import { MapComponent } from "./charts/location";
 
 const Dashboard = () => {
@@ -16,6 +16,8 @@ const Dashboard = () => {
   const [totalSuppliesToday, setTotalSuppliesToday] = useState(0);
   const [totalSuppliesYesterday, setTotalSuppliesYesterday] = useState(0);
   const [totalUserToday, setTotalUserToday] = useState(0);
+  const [userRole, setUserRole] = useState("");
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -70,10 +72,25 @@ const Dashboard = () => {
       })
       .catch((error) => console.error("Error fetching locations:", error));
   }, []);
+  useEffect(() => {
+    const user = JSON.parse(window.localStorage.getItem("user"));
+    if (user) {
+      setUserRole(user.role);
+    }
+  }, []);
 
+  // Render only if user has admin role
+  if (userRole !== "admin") {
+    return (
+      <Typography variant="h6" color="error">
+        Access restricted. Only admins are allowed to access this page.
+      </Typography>
+    );
+  }
   return (
     <div style={{ textAlign: "center" }}>
       <h1>Dashboard</h1>
+      {/* Total counters */}
       <Box
         sx={{ display: "flex", flexDirection: "row", gap: 2, marginBottom: 4 }}
       >
@@ -90,7 +107,7 @@ const Dashboard = () => {
             justifyContent: "center",
           }}
         >
-          <p>Total Users: {totalUser}</p>
+          <Typography>Total Users: {totalUser}</Typography>
         </Box>
         <Box
           sx={{
@@ -105,7 +122,7 @@ const Dashboard = () => {
             justifyContent: "center",
           }}
         >
-          <p>Total Reports: {totalOverall}</p>
+          <Typography>Total Reports: {totalOverall}</Typography>
         </Box>
         <Box
           sx={{
@@ -120,7 +137,7 @@ const Dashboard = () => {
             justifyContent: "center",
           }}
         >
-          <p>Total Donations: {totalSupplies}</p>
+          <Typography>Total Donations: {totalSupplies}</Typography>
         </Box>
         <Box
           sx={{
@@ -135,7 +152,7 @@ const Dashboard = () => {
             justifyContent: "center",
           }}
         >
-          <p>Total Manuals Created: {totalManuals}</p>
+          <Typography>Total Manuals Created: {totalManuals}</Typography>
         </Box>
         <Box
           sx={{
@@ -150,7 +167,7 @@ const Dashboard = () => {
             justifyContent: "center",
           }}
         >
-          <p>Total Preparedness: {totalPreparedness}</p>
+          <Typography>Total Preparedness: {totalPreparedness}</Typography>
         </Box>
       </Box>
       <Box
@@ -169,7 +186,7 @@ const Dashboard = () => {
             justifyContent: "center",
           }}
         >
-          <p>Total Reports Today: {totalToday}</p>
+          <Typography>Total Reports Today: {totalToday}</Typography>
         </Box>
         <Box
           sx={{
@@ -184,7 +201,7 @@ const Dashboard = () => {
             justifyContent: "center",
           }}
         >
-          <p>Total Reports Yesterday: {totalYesterday}</p>
+          <Typography>Total Reports Yesterday: {totalYesterday}</Typography>
         </Box>
         <Box
           sx={{
@@ -199,7 +216,7 @@ const Dashboard = () => {
             justifyContent: "center",
           }}
         >
-          <p>Total User Today: {totalUserToday}</p>
+          <Typography>Total User Today: {totalUserToday}</Typography>
         </Box>
         <Box
           sx={{
@@ -214,7 +231,7 @@ const Dashboard = () => {
             justifyContent: "center",
           }}
         >
-          <p>Total Supplies Today: {totalSuppliesToday}</p>
+          <Typography>Total Supplies Today: {totalSuppliesToday}</Typography>
         </Box>
         <Box
           sx={{
@@ -229,10 +246,12 @@ const Dashboard = () => {
             justifyContent: "center",
           }}
         >
-          <p>Total Supplies Yesterday: {totalSuppliesYesterday}</p>
+          <Typography>
+            Total Supplies Yesterday: {totalSuppliesYesterday}
+          </Typography>
         </Box>
       </Box>
-
+      {/* Charts */}
       <div
         style={{
           display: "flex",
@@ -240,6 +259,7 @@ const Dashboard = () => {
           marginBottom: 4,
         }}
       >
+        {/* Chart 1 */}
         <Paper
           elevation={3}
           style={{
@@ -251,6 +271,7 @@ const Dashboard = () => {
         >
           <Charts />
         </Paper>
+        {/* Chart 2 */}
         <Paper
           elevation={3}
           style={{

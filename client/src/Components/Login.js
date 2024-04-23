@@ -21,7 +21,6 @@ function Login() {
 
   function login(values) {
     setloading(true);
-    // console.log(setinfo)
     var payload = {
       email: values.email,
       password: values.password,
@@ -32,9 +31,7 @@ function Login() {
       data: payload,
     })
       .then((response) => {
-        // console.log("Response is :",response)
         if (response.data.user) {
-          //Authentication done.
           toast.success("Logged In Successfully!", {
             position: "bottom-right",
             autoClose: 1000,
@@ -47,7 +44,6 @@ function Login() {
           });
           setuser_info(response.data.user);
           localStorage.setItem("token", response.data.token);
-          // console.log(response.data.user)
           localStorage.setItem("user", JSON.stringify(response.data.user));
           window.location.href = "/";
         } else {

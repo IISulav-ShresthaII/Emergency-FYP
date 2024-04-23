@@ -49,7 +49,7 @@ const SupplyMap = ({ latitude, longitude, onClose }) => {
       <div style={{ height: "calc(100% - 48px)", width: "100%" }}>
         <GoogleMapReact
           bootstrapURLKeys={{
-            key: "YOUR_GOOGLE_MAPS_API_KEY",
+            key: "AIzaSyBwTN8VNLAfwlJ67FNjrVixdvCFZsCHvsI",
           }}
           defaultCenter={defaultProps.center}
           defaultZoom={defaultProps.zoom}

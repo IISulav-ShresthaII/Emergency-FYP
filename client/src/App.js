@@ -28,28 +28,20 @@ function App() {
       <Layout>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/log-in" element={<Login />} /> done
+          <Route path="/log-in" element={<Login />} />
           <Route path="/sign-up" element={<Signup />} />
           <Route path="/location" element={<MapComponent />} />
-          done
           <Route path="/lostitems" element={<LostItems />} />
-          done
           <Route path="/founditems" element={<FoundItems />} />
-          done
           <Route path="/manual" element={<Manual />} />
-          done
           <Route path="/viewmanual" element={<ViewManual />} />
-          done
           <Route path="/postitem" element={<LostItem />} />
           <Route path="/Supplies" element={<Supplies />} />
           <Route path="/NearbyHospitals" element={<Map />} />
-          no need
           <Route path="/NearbyStations" element={<PoliceStation />} />
-          no need
           <Route path="/mylistings" element={<MyListings />} />
           <Route path="/mysupplies" element={<MySupplies />} />
           <Route path="/GetPreparedness" element={<GetPreparedness />} />
-          done
           <Route path="/:item" element={<ItemPage />} />
           <Route path="/Preparedness" element={<Preparedness />} />
           <Route path="/adminstaffaddition" element={<AdminStaffAddition />} />

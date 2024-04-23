@@ -15,6 +15,8 @@ router.get("/supplieschart", async (req, res) => {
       { $sort: { _id: 1 } },
     ]);
 
+    console.log(suppliesChartData); // Log the raw data to see what's being returned
+
     const labels = suppliesChartData.map((supplies) => supplies._id);
     const data = suppliesChartData.map((supplies) => supplies.count);
 
