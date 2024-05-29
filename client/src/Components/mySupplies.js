@@ -14,6 +14,7 @@ import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import GoogleMapReact from "google-map-react";
 import RoomIcon from "@mui/icons-material/Room";
+import { ThreeDots } from "react-loader-spinner"; // Import the loader spinner
 
 const Marker = () => <RoomIcon style={{ color: "red", fontSize: 30 }} />;
 
@@ -87,9 +88,11 @@ const MySupplies = () => {
   const [user_info, setUser_info] = useState(
     JSON.parse(localStorage.getItem("user"))
   );
+  const [loading, setLoading] = useState(false); // Loading state for fetching data
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true); // Set loading state to true when starting to fetch data
       try {
         const response = await Axios.get("http://localhost:4000/supplies");
         const allsupplies = response.data.suppliess.reverse();
@@ -102,7 +105,7 @@ const MySupplies = () => {
           .slice(startIndex, endIndex)
           .map((supply) => ({ ...supply }));
 
-        // Initialize collectedStatus from local storage
+        // Initialize collectedStatus
         const initialCollectedStatus = {};
         data.forEach((supply) => {
           const collectedValue = localStorage.getItem(
@@ -111,10 +114,11 @@ const MySupplies = () => {
           initialCollectedStatus[supply._id] = collectedValue === "yes";
         });
         setCollectedStatus(initialCollectedStatus);
-
         setSupplies(data);
       } catch (err) {
         console.log("Error fetching supplies:", err);
+      } finally {
+        setLoading(false); // Set loading state to false after data is fetched
       }
     };
 
@@ -128,7 +132,6 @@ const MySupplies = () => {
         collected: collectedStatus[supplyId] ? "no" : "yes",
       });
 
-      // Update local storage
       localStorage.setItem(
         `collected_${supplyId}`,
         collectedStatus[supplyId] ? "no" : "yes"
@@ -176,98 +179,111 @@ const MySupplies = () => {
         maxWidth="1440px"
         position="relative"
       >
-        {supplies.map((supply) => (
-          <Card key={supply._id} sx={{ maxWidth: 500 }}>
-            <CardContent
-              sx={{
-                border: "2px solid",
-                borderColor: (theme) => theme.palette.primary.main,
-                borderRadius: "10px",
-                backgroundColor: "#f0f0f0",
-                padding: "20px",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: "16px",
-              }}
-            >
-              <Avatar
-                src={supply.img}
+        {loading ? ( // Show loader while data is being fetched
+          <ThreeDots
+            height="80"
+            width="80"
+            radius="9"
+            color="#4fa94d"
+            ariaLabel="three-dots-loading"
+            visible={true}
+          />
+        ) : (
+          supplies.map((supply) => (
+            <Card key={supply._id} sx={{ maxWidth: 500 }}>
+              <CardContent
                 sx={{
-                  width: "230px",
-                  height: "200px",
+                  border: "2px solid",
+                  borderColor: (theme) => theme.palette.primary.main,
+                  borderRadius: "10px",
+                  backgroundColor: "#f0f0f0",
+                  padding: "20px",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: "16px",
                 }}
-              />
-              <Typography
-                variant="h6"
-                color="primary.main"
-                textAlign="center"
-                fontWeight="bold"
               >
-                {supply.name}
-              </Typography>
-              <Typography color="text.secondary" textAlign="center">
-                {supply.amount}
-              </Typography>
-              <Typography color="text.secondary" textAlign="center">
-                {new Date(supply.createdAt).toLocaleString()}
-              </Typography>
-              {user_info.role === "staff" && (
-                <ToggleButtonGroup
-                  value={
-                    collectedStatus[supply._id] ? "collected" : "notCollected"
-                  }
-                  exclusive
-                  onChange={() => toggleCollected(supply._id)}
-                  aria-label="collected"
+                <Avatar
+                  src={supply.img}
                   sx={{
-                    border: "2px solid black", // Add border style here
-                    borderRadius: "10px", // Optional: Add border radius
+                    width: "230px",
+                    height: "200px",
                   }}
+                />
+                <Typography
+                  variant="h6"
+                  color="primary.main"
+                  textAlign="center"
+                  fontWeight="bold"
                 >
-                  <ToggleButton
-                    value="collected"
+                  {supply.name}
+                </Typography>
+                <Typography color="text.secondary" textAlign="center">
+                  {supply.amount}
+                </Typography>
+                <Typography color="text.secondary" textAlign="center">
+                  {new Date(supply.createdAt).toLocaleString()}
+                </Typography>
+                {user_info.role === "staff" && (
+                  <ToggleButtonGroup
+                    value={
+                      collectedStatus[supply._id] ? "collected" : "notCollected"
+                    }
+                    exclusive
+                    onChange={() => toggleCollected(supply._id)}
+                    aria-label="collected"
                     sx={{
-                      backgroundColor: collectedStatus[supply._id]
-                        ? "green"
-                        : "",
-                      "&.Mui-selected": {
+                      border: "2px solid black", // Add border style here
+                      borderRadius: "10px", // Optional: Add border radius
+                    }}
+                  >
+                    <ToggleButton
+                      value="collected"
+                      sx={{
                         backgroundColor: collectedStatus[supply._id]
                           ? "green"
                           : "",
-                        borderRight: "2px solid black", // Add right border for the first button
-                      },
-                    }}
-                  >
-                    Collected
-                  </ToggleButton>
-                  <ToggleButton
-                    value="notCollected"
-                    sx={{
-                      backgroundColor: collectedStatus[supply._id] ? "" : "red",
-                      "&.Mui-selected": {
+                        "&.Mui-selected": {
+                          backgroundColor: collectedStatus[supply._id]
+                            ? "green"
+                            : "",
+                          borderRight: "2px solid black", // Add right border for the first button
+                        },
+                      }}
+                    >
+                      Collected
+                    </ToggleButton>
+                    <ToggleButton
+                      value="notCollected"
+                      sx={{
                         backgroundColor: collectedStatus[supply._id]
                           ? ""
                           : "red",
-                        borderLeft: "2px solid black", // Add left border for the last button
-                      },
-                    }}
-                  >
-                    Not Collected
-                  </ToggleButton>
-                </ToggleButtonGroup>
-              )}
+                        "&.Mui-selected": {
+                          backgroundColor: collectedStatus[supply._id]
+                            ? ""
+                            : "red",
+                          borderLeft: "2px solid black", // Add left border for the last button
+                        },
+                      }}
+                    >
+                      Not Collected
+                    </ToggleButton>
+                  </ToggleButtonGroup>
+                )}
 
-              <Button
-                onClick={() => handleShowMap(supply)}
-                variant="outlined"
-                color="primary"
-              >
-                Show Map
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
+                <Button
+                  onClick={() => handleShowMap(supply)}
+                  variant="outlined"
+                  color="primary"
+                >
+                  Show Map
+                </Button>
+              </CardContent>
+            </Card>
+          ))
+        )}
       </Stack>
       {selectedSupply && (
         <SupplyMap

@@ -108,7 +108,7 @@ const ViewManual = () => {
     try {
       const response = await Axios.get("http://localhost:4000/manual");
       const allmanual = response.data.manuals.reverse();
-      const manualPerPage = 9;
+      const manualPerPage = 8;
       const numManual = allmanual.length;
       setMaxPages(Math.ceil(numManual / manualPerPage));
       const startIndex = (page - 1) * manualPerPage;
@@ -136,7 +136,7 @@ const ViewManual = () => {
           );
         }
 
-        const manualPerPage = 9;
+        const manualPerPage = 8;
         const numManual = filteredManual.length;
         setMaxPages(Math.ceil(numManual / manualPerPage));
         const startIndex = (page - 1) * manualPerPage;
@@ -237,26 +237,32 @@ const ViewManual = () => {
         </StyledPaper>
       </Box>
       <Stack
-        direction={{ xs: "column", sm: "row" }}
+        direction={{ xm: "column", xs: "row" }}
         justifyContent="center"
         alignItems="center"
-        spacing={3}
+        spacing={6}
         marginBottom={4}
+        sx={{ flexWrap: "wrap" }}
       >
         {manual.map((supply) => (
           <motion.div
-            whileHover={{ scale: 1.05 }}
-            transition={{ duration: 0.4 }}
             key={supply._id}
-            sx={{ width: { xs: "100%", sm: "auto" } }}
+            sx={{
+              width: {
+                xs: "100%",
+                sm: "calc(10% - 24px)",
+                md: "calc(5% - 24px)",
+              }, // Adjust width for different screen sizes
+              marginBottom: 3, // Add some bottom margin to create space between rows
+            }}
           >
             <StyledCard>
               <StyledCardContent>
                 <Avatar
                   src={supply.img}
-                  sx={{ width: 100, height: 100, margin: "0 auto 16px" }}
+                  sx={{ width: 100, height: 100, margin: "0 auto 40px" }}
                 />
-                <Typography variant="h6" align="center" gutterBottom>
+                <Typography variant="h5" align="center" gutterBottom>
                   {supply.title}
                 </Typography>
                 <Button
@@ -311,7 +317,7 @@ const ViewManual = () => {
               variant="outlined"
               name="description"
               multiline
-              rows={4}
+              rows={10}
               value={editFormData.description}
               onChange={handleEditChange}
               fullWidth

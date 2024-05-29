@@ -18,6 +18,7 @@ import {
   MenuItem,
   FormHelperText,
   FormControl,
+  CircularProgress,
 } from "@mui/material";
 import { Formik, Form } from "formik";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
@@ -26,6 +27,7 @@ import * as Yup from "yup";
 import report from "../img/report.svg";
 import GoogleMapReact from "google-map-react";
 import markerIcon from "../img/marker.svg";
+import { ThreeDots } from "react-loader-spinner";
 
 const Marker = ({ text }) => (
   <img
@@ -40,6 +42,7 @@ const LostItem = () => {
   const [progress, setProgress] = useState(0);
   const [userLocation, setUserLocation] = useState(null);
   const [loading, setloading] = useState(false);
+  const [imagePreviews, setImagePreviews] = useState([]);
   const usertoken = window.localStorage.getItem("token");
   const getUserId = () => {
     const user = JSON.parse(window.localStorage.getItem("user"));
@@ -47,6 +50,8 @@ const LostItem = () => {
   };
   const config = { headers: { token: usertoken } };
   const [image, setImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [uploadProgress, setUploadProgress] = useState([]);
 
   const schema = Yup.object().shape({
     name: Yup.string().required("Item name is required"),
@@ -54,7 +59,9 @@ const LostItem = () => {
     type: Yup.string().required("Item type is required"),
     location: Yup.string().required("Location is required"),
     date: Yup.string().required("Date is required"),
-    number: Yup.string().required("Phone number is required"),
+    number: Yup.string()
+      .required("Phone number is required")
+      .matches(/^\d{10}$/, "Phone number must be exactly 10 digits"),
   });
 
   const getUserLocation = () => {
@@ -101,9 +108,35 @@ const LostItem = () => {
   useEffect(() => {
     getUserLocation();
   }, []);
+  const MAX_FILE_SIZE_MB = 5; // Maximum file size in MB
 
   const handleImageUpload = (e) => {
-    setImage(e.target.files);
+    const selectedFile = e.target.files[0];
+
+    // Check if file size exceeds the limit
+    if (selectedFile.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+      // File size exceeds the limit, show error message
+      toast.error(`File size exceeds the limit of ${MAX_FILE_SIZE_MB}MB`, {
+        position: "bottom-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+      // Clear the file input
+      e.target.value = null;
+      // Reset image preview
+      setImagePreview(null);
+      return;
+    }
+
+    // File size within the limit, set image and image preview
+    setImage(selectedFile);
+    setImagePreview(URL.createObjectURL(selectedFile)); // Set image preview
+    setUploadProgress(Array(1).fill(0)); // Initialize upload progress array
   };
 
   const handleSubmit = async (values) => {
@@ -143,7 +176,7 @@ const LostItem = () => {
 
     for (let i = 0; i < image.length; i++) {
       const img = image[i];
-      const imageName = `${Date.now()}_${img.name}`; // Add timestamp to ensure unique file names
+      const imageName = `${Date.now()}_${img.name}`; // to ensure unique file names
       const storageRef = ref(storage, `/images/${imageName}`);
       const fileRef = ref(storageRef, imageName);
       const uploadTask = uploadBytesResumable(fileRef, img);
@@ -280,7 +313,6 @@ const LostItem = () => {
                           <input
                             hidden
                             accept="image/*"
-                            multiple
                             type="file"
                             id="image"
                             label="Upload Image"
@@ -288,8 +320,29 @@ const LostItem = () => {
                             onChange={handleImageUpload}
                           />
                         </Button>
+                        {imagePreview && (
+                          <img
+                            src={imagePreview}
+                            alt="Selected"
+                            width="100"
+                            height="100"
+                          />
+                        )}{" "}
+                        {/* Display image preview */}
+                        {/* Show loader if images are being uploaded */}
+                        {loading && (
+                          <ThreeDots
+                            height="80"
+                            width="80"
+                            radius="9"
+                            color="#4fa94d"
+                            ariaLabel="three-dots-loading"
+                            visible={true}
+                          />
+                        )}
                       </Stack>
                     </Grid>
+
                     <Grid item xs={12}>
                       <Typography variant="h6">Emergency Details</Typography>
                     </Grid>
@@ -360,11 +413,17 @@ const LostItem = () => {
                         variant="standard"
                         id="date"
                         name="date"
-                        label=""
+                        label="Date"
                         size="small"
                         type="date"
                         value={values.date}
                         onChange={handleChange}
+                        inputProps={{
+                          min: new Date().toISOString().slice(0, 10), // Set min attribute to today's date
+                        }}
+                        InputLabelProps={{
+                          shrink: true, // Disable dd/mm/yyyy placeholder
+                        }}
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -374,12 +433,23 @@ const LostItem = () => {
                         variant="standard"
                         id="number"
                         name="number"
-                        label="How can we contact you?"
+                        label="Phone Number(10 Digits)"
                         size="small"
                         value={values.number}
-                        onChange={handleChange}
+                        onChange={(e) => {
+                          const formattedValue = e.target.value
+                            .replace(/\D/g, "")
+                            .slice(0, 10);
+                          handleChange({
+                            target: {
+                              name: "number",
+                              value: formattedValue,
+                            },
+                          });
+                        }}
                       />
                     </Grid>
+
                     <Grid item xs={12}>
                       <FormControl variant="standard" fullWidth sx={{ mt: 1 }}>
                         <InputLabel id="demo-simple-select-standard-label">
@@ -403,8 +473,17 @@ const LostItem = () => {
                     <Grid item xs={12}>
                       <motion.div whileTap={{ scale: 1.05 }}>
                         <Stack spacing={2} direction="row">
-                          <Button type="submit" variant="contained" fullWidth>
-                            Create post
+                          <Button
+                            type="submit"
+                            variant="contained"
+                            fullWidth
+                            disabled={loading}
+                          >
+                            {loading ? (
+                              <CircularProgress size={24} />
+                            ) : (
+                              "Create post"
+                            )}
                           </Button>
                         </Stack>
                       </motion.div>

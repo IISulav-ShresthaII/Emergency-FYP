@@ -49,7 +49,7 @@ export default function LostItems() {
     })
       .then((response) => {
         const allitems = response.data.items.reverse();
-        const itemsPerPage = 9;
+        const itemsPerPage = 8;
         const numItems = allitems.length;
         setMaxPages(Math.ceil(numItems / itemsPerPage));
         const startIndex = (page - 1) * itemsPerPage;

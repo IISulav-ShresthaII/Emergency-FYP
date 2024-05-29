@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { toast } from "react-toastify";
 import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 import "react-toastify/dist/ReactToastify.css";
+import { ThreeDots } from "react-loader-spinner"; // Import the loader spinner
 
 import {
   Container,
@@ -14,6 +15,7 @@ import {
   Typography,
   Stack,
   TextField,
+  CircularProgress,
 } from "@mui/material";
 import { Formik, Form } from "formik";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
@@ -28,6 +30,8 @@ const Supplies = () => {
   const [loading, setLoading] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [defaultCenter, setDefaultCenter] = useState({ lat: 0, lng: 0 });
+  const [imagePreview, setImagePreview] = useState(null);
+  const [uploadProgress, setUploadProgress] = useState([]); // State to track upload progress
 
   useEffect(() => {
     getUserLocation();
@@ -82,22 +86,55 @@ const Supplies = () => {
 
   const config = { headers: { token: usertoken } };
 
+  const MAX_FILE_SIZE_MB = 5; // Maximum file size in MB
+
   const handleImageUpload = (e) => {
-    setImage(e.target.files);
+    const selectedFile = e.target.files[0];
+
+    // Check if file size exceeds the limit
+    if (selectedFile.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+      // File size exceeds the limit, show error message
+      toast.error(`File size exceeds the limit of ${MAX_FILE_SIZE_MB}MB`, {
+        position: "bottom-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+      // Clear the file input
+      e.target.value = null;
+      // Reset image preview
+      setImagePreview(null);
+      return;
+    }
+
+    // File size within the limit, set image and image preview
+    setImage(selectedFile);
+    setImagePreview(URL.createObjectURL(selectedFile)); // Set image preview
+    setUploadProgress(Array(1).fill(0)); // Initialize upload progress array
   };
+
   const handleMapClick = (event) => {
     setSelectedLocation({
       lat: event.latLng.lat(),
       lng: event.latLng.lng(),
     });
   };
+
   const handleSubmit = async (values) => {
     // Validation schema
     const schema = Yup.object().shape({
       name: Yup.string().required("Supply name is required"),
       amount: Yup.string().required("Amount is required"),
       location: Yup.string().required("Location is required"),
-      number: Yup.string().required("Phone number is required"),
+      number: Yup.string()
+        .required("Phone number is required")
+        .min(10, "At least 10 characters")
+        .max(10, "t least 10 characters")
+        .matches(/^\d{10}$/, "Phone number must be exactly 10 digits"),
     });
 
     try {
@@ -157,7 +194,16 @@ const Supplies = () => {
       const promise = new Promise((resolve, reject) => {
         uploadTask.on(
           "state_changed",
-          (snapshot) => {},
+          (snapshot) => {
+            // Update upload progress
+            const progress =
+              (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            setUploadProgress((prev) => {
+              const newProgress = [...prev];
+              newProgress[i] = progress;
+              return newProgress;
+            });
+          },
           (error) => {
             console.log(error);
             reject(error);
@@ -279,7 +325,6 @@ const Supplies = () => {
                           <input
                             hidden
                             accept="image/*"
-                            multiple
                             type="file"
                             id="image"
                             label="Upload Image"
@@ -287,6 +332,26 @@ const Supplies = () => {
                             onChange={handleImageUpload}
                           />
                         </Button>
+                        {imagePreview && (
+                          <img
+                            src={imagePreview}
+                            alt="Selected"
+                            width="100"
+                            height="100"
+                          />
+                        )}{" "}
+                        {/* Display image preview */}
+                        {/* Show loader if images are being uploaded */}
+                        {loading && (
+                          <ThreeDots
+                            height="80"
+                            width="80"
+                            radius="9"
+                            color="#4fa94d"
+                            ariaLabel="three-dots-loading"
+                            visible={true}
+                          />
+                        )}
                       </Stack>
                     </Grid>
                     <Grid item xs={12}>
@@ -313,9 +378,21 @@ const Supplies = () => {
                         fullWidth
                         variant="standard"
                         value={values.amount}
-                        onChange={handleChange}
+                        onChange={(e) => {
+                          const formattedValue = e.target.value.replace(
+                            /\D/g,
+                            ""
+                          ); // Remove non-numeric characters
+                          handleChange({
+                            target: {
+                              name: "amount",
+                              value: formattedValue,
+                            },
+                          });
+                        }}
                       />
                     </Grid>
+
                     <Grid item xs={12}>
                       <Typography variant="h6">Location</Typography>
                       <div style={{ height: "300px", width: "100%" }}>
@@ -364,10 +441,20 @@ const Supplies = () => {
                         variant="standard"
                         id="number"
                         name="number"
-                        label="How can we contact you? "
+                        label="Phone Number(10 Digits)"
                         size="small"
                         value={values.number}
-                        onChange={handleChange}
+                        onChange={(e) => {
+                          const formattedValue = e.target.value
+                            .replace(/\D/g, "")
+                            .slice(0, 10);
+                          handleChange({
+                            target: {
+                              name: "number",
+                              value: formattedValue,
+                            },
+                          });
+                        }}
                       />
                     </Grid>
                     <Grid item xs={12}>

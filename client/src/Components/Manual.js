@@ -196,7 +196,6 @@ const Manual = () => {
                           <input
                             hidden
                             accept="image/*"
-                            multiple
                             type="file"
                             id="image"
                             label="Upload Image"

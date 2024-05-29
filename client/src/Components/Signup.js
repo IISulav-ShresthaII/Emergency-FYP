@@ -1,10 +1,8 @@
-//responsive
 import React, { useState } from "react";
 import { Field, Formik, Form } from "formik";
 import PhotoCamera from "@mui/icons-material/PhotoCamera.js";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import { Navigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { storage } from "../firebase.js";
@@ -14,10 +12,33 @@ import {
   Stack,
   Divider,
   TextField,
-  Grid,
-  Box,
   Avatar,
 } from "@mui/material";
+import * as Yup from "yup";
+
+const SignupSchema = Yup.object().shape({
+  nickname: Yup.string()
+    .min(2, "Nickname is too short!")
+    .max(50, "Nickname is too long!")
+    .required("Nickname is required"),
+  fullname: Yup.string()
+    .min(2, "Full name is too short!")
+    .max(100, "Full name is too long!")
+    .required("Full name is required"),
+  email: Yup.string()
+    .email("Invalid email address")
+    .required("Email is required"),
+  password: Yup.string()
+    .min(8, "Password must be at least 8 characters")
+    .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .matches(/[a-z]/, "Password must contain at least one lowercase letter")
+    .matches(/\d/, "Password must contain at least one number")
+    .matches(
+      /[!@#$%^&*(),.?":{}|<>]/,
+      "Password must contain at least one special character"
+    )
+    .required("Password is required"),
+});
 
 function Signup() {
   const [info, setInfo] = useState("");
@@ -25,12 +46,26 @@ function Signup() {
   const [image, setImage] = useState(null);
 
   const handleImageUpload = (e) => {
-    if (e.target.files[0]) {
-      setImage(e.target.files[0]);
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5242880) {
+        // 5 MB in bytes
+        toast.error("File size exceeds 5 MB. Please select a smaller file.", {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+      } else {
+        setImage(file);
+      }
     }
   };
 
-  function handleSubmit(values) {
+  const handleSubmit = async (values) => {
     const { nickname, fullname, email, password } = values;
 
     const uploadImage = async () => {
@@ -65,7 +100,6 @@ function Signup() {
                   if (response.data === "Done") {
                     toast.success("You are now successfully Signed up!", {
                       position: "bottom-right",
-
                       autoClose: 800,
                       hideProgressBar: false,
                       closeOnClick: true,
@@ -125,13 +159,13 @@ function Signup() {
             }
           })
           .catch(() => {
-            console.log("Error occured");
+            console.log("Error occurred");
           });
       }
     };
     uploadImage();
-  }
-  // console.log("State is :"+ this.state)
+  };
+
   return (
     <Stack
       justifyContent="center"
@@ -159,7 +193,7 @@ function Signup() {
           overflow="hidden"
           ml={10}
         >
-          <Typography fontSize="20px" color="white" fontWeight="">
+          <Typography fontSize="20px" color="white">
             Sign Up
           </Typography>
 
@@ -190,11 +224,12 @@ function Signup() {
               email: "",
               password: "",
             }}
+            validationSchema={SignupSchema}
             onSubmit={(values) => {
               handleSubmit(values);
             }}
           >
-            {({ values, handleChange }) => (
+            {({ values, handleChange, errors, touched }) => (
               <Form>
                 <Stack
                   alignItems="start"
@@ -242,7 +277,6 @@ function Signup() {
                         <input
                           hidden
                           accept="image/*"
-                          multiple
                           type="file"
                           id="image"
                           label="Upload Image"
@@ -263,6 +297,8 @@ function Signup() {
                       required
                       onChange={handleChange}
                       value={values.nickname}
+                      error={touched.nickname && !!errors.nickname}
+                      helperText={touched.nickname && errors.nickname}
                     />
                   </Stack>
                   <Stack justifyContent="flex-start" width="100%">
@@ -276,6 +312,8 @@ function Signup() {
                       required
                       onChange={handleChange}
                       value={values.fullname}
+                      error={touched.fullname && !!errors.fullname}
+                      helperText={touched.fullname && errors.fullname}
                     />
                   </Stack>
                   <Stack justifyContent="flex-start" width="100%">
@@ -286,11 +324,13 @@ function Signup() {
                       name="email"
                       id="email"
                       margin="dense"
-                      label="email"
+                      label="Email"
                       placeholder="email@example.com"
                       size="small"
                       onChange={handleChange}
                       value={values.email}
+                      error={touched.email && !!errors.email}
+                      helperText={touched.email && errors.email}
                     />
                   </Stack>
                   <Stack justifyContent="flex-start" width="100%">
@@ -300,11 +340,13 @@ function Signup() {
                       type="password"
                       name="password"
                       margin="dense"
-                      label="password"
+                      label="Password"
                       id="password"
                       size="small"
                       onChange={handleChange}
                       value={values.password}
+                      error={touched.password && !!errors.password}
+                      helperText={touched.password && errors.password}
                     />
                   </Stack>
 
@@ -336,7 +378,6 @@ function Signup() {
             gap="10px"
             margin="1rem 0"
           >
-            {" "}
             <Typography fontSize="16px">Already have an account?</Typography>
             <Typography component={Link} to="/log-in" fontSize="16px">
               Login
@@ -347,4 +388,5 @@ function Signup() {
     </Stack>
   );
 }
+
 export default Signup;

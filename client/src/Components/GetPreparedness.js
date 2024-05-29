@@ -212,7 +212,7 @@ const GetPreparedness = () => {
     if (editMode) {
       return (
         <form onSubmit={(event) => handleEditSubmit(event, editedSupply._id)}>
-          <Typography variant="h6" component="h2">
+          <Typography variant="h5" component="h2">
             Edit Preparedness Item
           </Typography>
           <TextField
@@ -230,7 +230,7 @@ const GetPreparedness = () => {
             variant="outlined"
             name="description"
             multiline
-            rows={4}
+            rows={10}
             value={editedSupply.description}
             onChange={handleEditChange}
             fullWidth
@@ -248,12 +248,12 @@ const GetPreparedness = () => {
     } else {
       return (
         <>
-          <Typography id="modal-modal-title" variant="h6" component="h2">
+          <Typography id="modal-modal-title" variant="h5" component="h2">
             {expandedCard?.title}
           </Typography>
           <Avatar
             src={expandedCard?.img}
-            sx={{ width: 200, height: 200, margin: "0 auto" }}
+            sx={{ width: 400, height: 800, margin: "0 auto" }}
           />
           <Typography
             id="modal-modal-description"
@@ -292,8 +292,8 @@ const GetPreparedness = () => {
         direction={{ xs: "column", sm: "row" }} // Adjusted direction for responsiveness
         justifyContent="center"
         alignItems="center"
-        spacing={3}
-        marginBottom={4}
+        spacing={6}
+        marginBottom={1}
       >
         {filteredPreparednesss.map((supply) => (
           <motion.div
@@ -306,7 +306,7 @@ const GetPreparedness = () => {
               <StyledCardContent>
                 <Avatar
                   src={supply.img}
-                  sx={{ width: 100, height: 100, margin: "0 auto 16px" }}
+                  sx={{ width: 100, height: 100, margin: "0 auto 40px" }}
                 />
                 <Typography variant="h6" align="center" gutterBottom>
                   {supply.title}
